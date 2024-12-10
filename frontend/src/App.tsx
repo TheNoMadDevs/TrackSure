@@ -1,12 +1,10 @@
-import { useState } from 'react'
-
 function App() {
 
   return (
     <>
-
+      TrackSure
     </>
   )
 }
 
-export default App
+export default App;
