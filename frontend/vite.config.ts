@@ -17,6 +17,8 @@ export default defineConfig({
       '@services': path.resolve(__dirname, './src/services'),
       '@styles': path.resolve(__dirname, './src/styles'),
       '@utils': path.resolve(__dirname, './src/utils'),
+      '@enums': path.resolve(__dirname, './src/enums'),
+      '@schemas': path.resolve(__dirname, './src/schemas'),
     },
   },
 })
