@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import { z } from 'zod';
+
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { Label } from '@components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
-import { userSignInSchema } from '@schemas/userSchema';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { userSignInSchema, userSignInType } from '@schemas/userSchema';
+import { useAuthActions } from '@hooks/useAuthActions';
+import { useAuthUser } from '@hooks/useAuthUser';
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -15,6 +19,9 @@ const SignIn: React.FC = () => {
     password?: string;
   }>({});
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { signIn } = useAuthActions();
+  const { role } = useAuthUser();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,17 +30,11 @@ const SignIn: React.FC = () => {
     
     try {
       // Validate login data
-      const validatedData = userSignInSchema.parse({ email, password });
+      const validatedData: userSignInType = userSignInSchema.parse({ email, password });
 
-      // Firebase login
-      const userCredential = await signInWithEmailAndPassword(
-        auth, 
-        validatedData.email, 
-        password
-      );
-
-      console.log('Logged in user:', userCredential.user);
-      // Navigate or set user state here
+      // Sign in user
+      const userData = await signIn(validatedData);
+      console.log(userData);
     } catch (error) {
       if (error instanceof z.ZodError) {
         const errorMap: { [key: string]: string } = {};
@@ -50,8 +51,15 @@ const SignIn: React.FC = () => {
         });
       }
       setLoading(false);
+      console.log(error);
     }
   };
+
+  useEffect(() => {
+    if (role) {
+      navigate('/' + role);
+    }
+  }, [role, navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center p-4">
