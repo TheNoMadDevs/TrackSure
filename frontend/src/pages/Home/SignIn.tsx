@@ -22,6 +22,7 @@ const SignIn: React.FC = () => {
   const navigate = useNavigate();
   const { signIn } = useAuthActions();
   const { role } = useAuthUser();
+  const { user } = useAuthUser();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,8 +59,11 @@ const SignIn: React.FC = () => {
   useEffect(() => {
     if (role) {
       navigate('/' + role);
+    } else if (user) {
+      // TODO: Toast notification
+      navigate('/');
     }
-  }, [role, navigate]);
+  }, [user, role, navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center p-4">
