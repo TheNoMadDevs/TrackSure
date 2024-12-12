@@ -1,8 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ModeToggle } from "@components/common/mode-toggle";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "@components/ui/breadcrumb";
-import { ChevronRight } from "lucide-react";
 import { useTheme } from "@components/common/ThemeProvider"
 
 const Header: React.FC = () => {
@@ -24,17 +22,6 @@ const Header: React.FC = () => {
         </div>
         <ModeToggle />
       </div>
-      <Breadcrumb className="px-6 py-2">
-        <BreadcrumbItem>
-          <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbItem>
-          <ChevronRight className="h-4 w-4" />
-        </BreadcrumbItem>
-        <BreadcrumbItem>
-          <BreadcrumbLink href="/">Home</BreadcrumbLink>
-        </BreadcrumbItem>
-      </Breadcrumb>
     </header>
   );
 };

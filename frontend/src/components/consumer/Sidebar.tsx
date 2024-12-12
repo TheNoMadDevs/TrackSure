@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { cn } from "@lib/utils";
 import { Button } from "@components/ui/button";
 import { ScrollArea } from "@components/ui/scroll-area";
-import { Home,  FileText, LogOut, ChevronLeft, ChevronRight, MapPinHouse } from 'lucide-react';
+import { Home,  FileText, FileStack, LogOut, ChevronLeft, ChevronRight, MapPinHouse } from 'lucide-react';
 
 interface SidebarItem {
   name: string;
@@ -17,8 +17,10 @@ function LogOutt(){
 
 const sidebarItems: SidebarItem[] = [
   { name: "Dashboard", icon: Home, href: "/" },
-  { name: "Products", icon: FileText, href: "/reports" },
-  { name: "Tracking", icon: MapPinHouse, href: "/alerts" },
+  { name: "Products", icon: FileText, href: "/products" },
+  { name: "Tracking", icon: MapPinHouse, href: "/tracking" },
+  { name: "Order History", icon: FileStack, href: "/history" },
+
 ];
 
 const Sidebar: React.FC = () => {

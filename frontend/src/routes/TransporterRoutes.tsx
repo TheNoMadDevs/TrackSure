@@ -1,16 +1,16 @@
 import { Route, Routes } from 'react-router-dom';
 
 import Dashboard from '@pages/Transporter/Dashboard';
-import Products from '@pages/Transporter/Shipments';
-import Notes from '@pages/Transporter/Notes';
+import CurrentShipment from '@pages/Transporter/CurrentShipment';
+import ShipmentHistory from '@pages/Transporter/ShipmentHistory';
 
 const TransporterRoutes = () => {
   return (
     <Routes>
       <Route path="" element={<Dashboard />} />
       <Route path="dashboard" element={<Dashboard />} />
-      <Route path="products" element={<Products />} />
-      <Route path="notes" element={<Notes />} />
+      <Route path="currentshipment" element={<CurrentShipment />} />
+      <Route path="shipmenthistory" element={<ShipmentHistory/>} />
     </Routes>
   );
 };

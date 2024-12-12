@@ -14,7 +14,7 @@ interface SidebarItem {
 const sidebarItems: SidebarItem[] = [
   { name: "Dashboard", icon: Home, href: "/dashboard" },
   { name: "Users", icon: Users, href: "/users" },
-  { name: "Reports", icon: FileText, href: "/reports" },
+  { name: "Inventory", icon: FileText, href: "/reports" },
 ];
 
 const Sidebar: React.FC = () => {
