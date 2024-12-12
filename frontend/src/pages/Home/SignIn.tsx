@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { z } from 'zod';
 
@@ -109,6 +109,14 @@ const SignIn: React.FC = () => {
               {loading ? 'Logging In...' : 'Log In'}
             </Button>
           </form>
+          <div className="mt-4 text-center">
+            <p className="text-sm text-gray-600">
+              Don't have an account?{' '}
+              <Link to="/signup" className="text-blue-500 hover:underline">
+                Sign Up
+              </Link>
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>
