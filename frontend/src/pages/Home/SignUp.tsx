@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { Label } from '@components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
-import { Link } from 'react-router-dom';
+import { useAuthActions } from '@hooks/useAuthActions';
 
 export const SignUp: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -23,6 +25,8 @@ export const SignUp: React.FC = () => {
     address?: string;
   }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { signUp } = useAuthActions();
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -56,14 +60,16 @@ export const SignUp: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      await SignUp({
-        name: formData.name,
+      await signUp({
         email: formData.email,
         password: formData.password,
+        name: formData.name,
         phoneNumber: formData.phoneNumber,
         address: formData.address
       });
       // Handle successful signup (e.g., redirect)
+      // TODO: Toast notification
+      navigate('/signin');
     } catch (error) {
       console.error('Signup failed:', error);
       // Handle signup error
