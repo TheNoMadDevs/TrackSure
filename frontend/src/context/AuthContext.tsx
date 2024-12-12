@@ -2,15 +2,16 @@ import React, { useState, useEffect, createContext } from 'react';
 import app from '@services/firebase';
 import { User, getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
-import { userSignUpType, userSignInType } from '@schemas/userSchema';
+import { userSignUpType, userSignInType, defaultUser } from '@schemas/userSchema';
 import { UserRole } from '@enums/UserRole';
 
 interface AuthContextType {
     user: User | null;
+    userInfo: defaultUser | null;
     role: UserRole | null;
     loading: boolean;
-    signUp: (data: userSignUpType) => Promise<void>;
-    signIn: (data: userSignInType) => Promise<void>;
+    signUp: (data: userSignUpType) => Promise<User>;
+    signIn: (data: userSignInType) => Promise<User>;
     signOut: () => Promise<void>;
     setUserRole: (uid: string, role: UserRole) => Promise<void>;
 }
@@ -19,6 +20,7 @@ export const AuthContext = createContext<AuthContextType>({} as AuthContextType)
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
+    const [userInfo, setUserInfo] = useState<defaultUser | null>(null);
     const [role, setRole] = useState<UserRole | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
 
@@ -32,16 +34,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const userDoc = doc(db, 'users', user.uid);
                 const userDocSnap = await getDoc(userDoc);
                 if (userDocSnap.exists()) {
-                    const roleData = userDocSnap.data()?.role;
-                    if (Object.values(UserRole).includes(roleData)) {
-                        setRole(roleData as UserRole);
+                    const data = userDocSnap.data();
+                    if (Object.values(UserRole).includes(data?.role)) {
+                        setRole(data?.role as UserRole);
                     } else {
                         console.error("Invalid role");
                         setRole(null);
                     }
+                    setUserInfo(data as defaultUser);
                 }
             } else {
                 setRole(null);
+                setUserInfo(null);
             }
             setLoading(false);
         });
@@ -59,10 +63,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             role: null,
             createdAt: new Date(),
         });
+        return userCred.user;
     };
 
     const signIn = async (data: userSignInType) => {
-        await signInWithEmailAndPassword(auth, data.email, data.password);
+        const userCred = await signInWithEmailAndPassword(auth, data.email, data.password);
+        return userCred.user;
     };
 
     const signOut = async () => {
@@ -78,7 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     return (
-        <AuthContext.Provider value={{ user, role, loading, signUp, signIn, signOut, setUserRole }}>
+        <AuthContext.Provider value={{ user, userInfo, role, loading, signUp, signIn, signOut, setUserRole }}>
             {!loading && children}
         </AuthContext.Provider>
     );

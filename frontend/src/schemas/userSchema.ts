@@ -1,4 +1,15 @@
+import { UserRole } from '@enums/UserRole';
 import { z } from 'zod';
+
+interface defaultUser {
+    email: string;
+    password: string;
+    name: string;
+    phoneNumber: string;
+    address: string;
+    role: UserRole | null;
+    createdAt: Date;
+}
 
 const userSignUpSchema = z.object({
     email: z.string().email(),
@@ -18,4 +29,4 @@ type userSignUpType = z.infer<typeof userSignUpSchema>;
 type userSignInType = z.infer<typeof userSignInSchema>;
 
 export { userSignUpSchema, userSignInSchema };
-export type { userSignUpType, userSignInType };
+export type { userSignUpType, userSignInType, defaultUser };
