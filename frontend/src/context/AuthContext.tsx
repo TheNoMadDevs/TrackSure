@@ -1,9 +1,7 @@
 import React, { useState, useEffect, createContext } from 'react';
-
 import app from '@services/firebase';
 import { User, getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
-
 import { userSignUpType, userSignInType } from '@schemas/userSchema';
 import { UserRole } from '@enums/UserRole';
 

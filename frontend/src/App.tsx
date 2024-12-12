@@ -3,13 +3,15 @@ import { Route, Routes } from 'react-router-dom';
 import ProtectedRoute from '@routes/ProtectedRoute';
 import routes from '@routes/RoutesConfig';
 import HomePage from '@pages/Home/HomePage';
-import LoginPage from '@pages/Home/Login';
+import SignUp from '@pages/Home/SignUp';
+import SignIn from '@pages/Home/SignIn';
 
 const App = () => {
   return (
     <Routes>
       <Route index element={<HomePage />} />
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signin" element={<SignIn />} />
+      <Route path="/signup" element={<SignUp />} />
       {routes.map((route) => (
         <Route
           key={route.path}
