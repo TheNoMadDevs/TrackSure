@@ -35,6 +35,7 @@
       "@services/*": ["src/services/*"],
       "@styles/*": ["src/styles/*"],
       "@utils/*": ["src/utils/*"],
+      "@lib/*": ["src/lib/*"],
       "@enums/*": ["src/enums/*"],
       "@schemas/*": ["src/schemas/*"],
     }

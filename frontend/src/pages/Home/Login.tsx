@@ -1,6 +1,9 @@
+import { AuthPage } from '@components/AuthPage';
 const Login = () => {
   return (
-    <div>Login</div>
+      <div>
+        <AuthPage />
+      </div>
   )
 }
 
