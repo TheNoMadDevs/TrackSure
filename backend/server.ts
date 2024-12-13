@@ -21,23 +21,23 @@ interface TrackingDetail {
     lastUpdated: admin.firestore.Timestamp;
 }
 
-async function getSensorData(sensorId: string, pin: string): Promise<number> {
-    const url = `https://blynk.cloud/external/api/get?token=${sensorId}&V${pin}`;
+async function getSensorData(sensorID: string, pin: string): Promise<number> {
+    const url = `https://blynk.cloud/external/api/get?token=${sensorID}&V${pin}`;
     try {
         const response = await axios.get<{ value: string }>(url);
-        return parseFloat(response.data.value);
+        return Number(response.data);
     } catch (error) {
-        console.error(`Failed to fetch data for sensorId ${sensorId} and pin ${pin}:`, error);
+        console.error(`Failed to fetch data for sensorID ${sensorID} and pin ${pin}:`, error);
         throw new Error(`Failed to fetch data for ${pin}`);
     }
 }
 
-async function setSensorData(sensorId: string, pin: string, value: number): Promise<void> {
-    const url = `https://blynk.cloud/external/api/update?token=${sensorId}&V${pin}=${value}`;
+async function setSensorData(sensorID: string, pin: string, value: number): Promise<void> {
+    const url = `https://blynk.cloud/external/api/update?token=${sensorID}&V${pin}=${value}`;
     try {
         await axios.get(url);
     } catch (error) {
-        console.error(`Failed to update data for sensorId ${sensorId} and pin ${pin}:`, error);
+        console.error(`Failed to update data for sensorID ${sensorID} and pin ${pin}:`, error);
         throw new Error(`Failed to update data for ${pin}`);
     }
 }
@@ -45,14 +45,18 @@ async function setSensorData(sensorId: string, pin: string, value: number): Prom
 async function pollRfIDs(): Promise<void> {
     console.log('Polling RFIDs...');
     try{
-
         const usersSnapshot = await db.collection('users').get();
+        if (usersSnapshot.empty) {
+            console.log('No users found.');
+            return;
+        }
         usersSnapshot.forEach(async (userDoc) => {
             const userData = userDoc.data();
             const rfID = userData.rfID;
             if (rfID) {
                 console.log(`Checking sensor for user: ${userData.name} with RFID: ${rfID}`);
-                const sensorValue = await getSensorData(rfID, 'V0');
+                const sensorValue = await getSensorData(rfID, '0');
+                console.log(`Sensor value for user: ${userData.name} is ${sensorValue}`);
                 if (sensorValue === 1) {
                     console.log(`Sensor value is 1 for user: ${userData.name}. Updating shipment status to 'in-transit'.`);
                     const shipmentsSnapshot = await db.collection('shipments')
@@ -61,12 +65,12 @@ async function pollRfIDs(): Promise<void> {
                     .get();
                     if (!shipmentsSnapshot.empty) {
                         const shipment = shipmentsSnapshot.docs[0];
-                        const shipmentId = shipment.id;
-                        await db.collection('shipments').doc(shipmentId).update({
+                        const shipmentID = shipment.id;
+                        await db.collection('shipments').doc(shipmentID).update({
                             status: 'in-transit',
                         });
-                        console.log(`Shipment ${shipmentId} status updated to 'in-transit'.`);
-                        await setSensorData(rfID, 'V0', 0);
+                        console.log(`Shipment ${shipmentID} status updated to 'in-transit'.`);
+                        await setSensorData(rfID, '0', 0);
                     } else {
                         console.log(`No pending shipments for transporter ${userData.name}.`);
                     }
@@ -89,22 +93,22 @@ async function pollSensors(): Promise<void> {
             console.log('No in-transit shipments found.');
             return;
         }
+        console.log(`Found ${shipmentsSnapshot.size} in-transit shipments.`);
         shipmentsSnapshot.forEach(async (doc) => {
             const shipment = doc.data();
-            const transporterId = shipment.transporterId;
-
-            const transporterSnapshot = await db.collection('users').doc(transporterId).get();
+            const transporterID = shipment.transporterID;
+            const transporterSnapshot = await db.collection('users').doc(transporterID).get();
             const transporter = transporterSnapshot.data();
-            const sensorId = transporter?.sensor;
-            if (!sensorId) {
-                console.log(`No sensor ID found for transporter: ${transporterId}`);
+            const sensorID = transporter?.sensorID;
+            if (!sensorID) {
+                console.log(`No sensor ID found for transporter: ${transporterID}`);
                 return;
             }
             try {
-                const temperature = await getSensorData(sensorId, 'V0');
-                const humidity = await getSensorData(sensorId, 'V1');
-                const latitude = await getSensorData(sensorId, 'V2');
-                const longitude = await getSensorData(sensorId, 'V3');
+                const temperature = await getSensorData(sensorID, '0');
+                const humidity = await getSensorData(sensorID, '1');
+                const latitude = await getSensorData(sensorID, '2');
+                const longitude = await getSensorData(sensorID, '3');
 
                 const newTrackingDetail: TrackingDetail = {
                     currentLocation: {
@@ -116,7 +120,7 @@ async function pollSensors(): Promise<void> {
                     lastUpdated: admin.firestore.Timestamp.now(),
                 };
 
-                await db.collection('shipments').doc(doc.id).update({
+                await db.collection('shipments').doc(shipment.shipmentID).update({
                     trackingDetails: admin.firestore.FieldValue.arrayUnion(newTrackingDetail),
                 });
 

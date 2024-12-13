@@ -4,7 +4,7 @@ import Header from "@components/common/Header";
 import Sidebar from "@components/admin/Sidebar";
 import UserCard from "@components/admin/Usercard";
 import app from "@services/firebase";
-import { collection, query, where, getDocs, getFirestore, doc, updateDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, getFirestore, doc, updateDoc, setDoc } from "firebase/firestore";
 import { defaultUser } from "@schemas/userSchema";
 import toast from "react-hot-toast";
 
@@ -21,8 +21,9 @@ const Users = () => {
       if (sensorID) updateData.sensorID = sensorID;
       await updateDoc(userDoc, updateData);
       if (role === "transporter") {
-        const transporterDoc = doc(db, "transporters", uid);
-        await updateDoc(transporterDoc, { isAvailable: true });
+        const transporterRef = collection(db, "transporters");
+        const transporterDoc = doc(transporterRef);
+        await setDoc(transporterDoc, { transporterID: uid, isAvailable: true });
       }
       setUsers((prevUsers) => prevUsers.filter((user) => user.uid !== uid));
       toast.success("User updated successfully");

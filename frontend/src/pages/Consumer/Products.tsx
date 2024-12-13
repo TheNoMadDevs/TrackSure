@@ -41,7 +41,8 @@ const History = () => {
       const availableTransportersSnapshot = await getDocs(availableTransportersQuery);
       if (!availableTransportersSnapshot.empty) {
         const transporterDoc = availableTransportersSnapshot.docs[0];
-        const transporterID = transporterDoc.id;
+        const transporterData = transporterDoc.data();
+        const transporterID = transporterData.transporterID;
         await updateDoc(transporterDoc.ref, { isAvailable: false, currentShipmentID: shipmentID });
         return transporterID;
       } else {

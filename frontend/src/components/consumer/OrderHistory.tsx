@@ -14,7 +14,7 @@ const OrderHistory = () => {
       const ordersQuery = query(
         collection(db, "orders"),
         where("delivered", "==", true),
-        where("orderID", "==", userInfo?.uid)
+        where("consumerID", "==", userInfo?.uid)
       );
       const querySnapshot = await getDocs(ordersQuery);
       const fetchedOrders: Order[] = [];
