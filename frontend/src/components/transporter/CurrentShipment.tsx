@@ -222,12 +222,16 @@ const TrackingPage = () => {
   return (
     <div className="w-full h-full">
       <div className=" p-4 flex items-center">
-        <button 
-          onClick={handleBackClick} 
-          className="mr-4 hover:bg-gray-200 p-2 rounded-full transition-colors duration-300"
-        >
-          <ArrowLeft className="h-6 w-6 text-gray-700" />
-        </button>
+        {
+          shipmentId && (
+            <button 
+              onClick={() => navigate("/transporter/currentshipment")} 
+              className="mr-4 hover:bg-gray-200 p-2 rounded-full transition-colors duration-300"
+            >
+              <ArrowLeft className="h-6 w-6 text-gray-700" />
+            </button>
+          )
+        }
         <h2 className="text-xl font-bold text-white">
           {shipmentId ? "Shipment Details" : "Tracking"}
         </h2>
