@@ -11,6 +11,7 @@ import { userSignInSchema, userSignInType } from '@schemas/userSchema';
 import { useAuthActions } from '@hooks/useAuthActions';
 import { useAuthUser } from '@hooks/useAuthUser';
 import toast from 'react-hot-toast';
+import { UserRole } from '@enums/UserRole';
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -21,22 +22,21 @@ const SignIn: React.FC = () => {
   }>({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { signIn } = useAuthActions();
+  const { signIn, signOut } = useAuthActions();
   const { role } = useAuthUser();
-  const { user } = useAuthUser();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
     setLoading(true);
-    
+
     try {
       // Validate login data
       const validatedData: userSignInType = userSignInSchema.parse({ email, password });
 
       // Sign in user
-      const userData = await signIn(validatedData);
-      console.log(userData);
+      await signIn(validatedData);
+
     } catch (error) {
       if (error instanceof z.ZodError) {
         const errorMap: { [key: string]: string } = {};
@@ -47,33 +47,50 @@ const SignIn: React.FC = () => {
         });
         setErrors(errorMap);
       } else if (error instanceof Error) {
-        // Firebase authentication error
-        setErrors({ 
-          password: error.message || 'Login failed. Please try again.' 
+        setErrors({
+          password: error.message || 'Login failed. Please try again.',
         });
       }
-      setLoading(false);
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (role) {
-      navigate('/' + role);
-    } else if (user) {
-      toast.success("Successfully logged in!", {
-        style: {
-          background: "white",
-          color: "black",
-        },
-        iconTheme: {
-          primary: "black",
-          secondary: "white",
-        },
-      });
-      navigate('/');
+    if (role === null) {
+      return;
     }
-  }, [user, role, navigate]);
+    if (role !== UserRole.UNASSIGNED) {
+      navigate('/' + role);
+      toast.success('Successfully logged in!',
+        {
+          style: {
+              background: "white",
+              color: "black",
+          },
+          iconTheme: {
+              primary: "black",
+              secondary: "white",
+          },
+      });
+    }
+    if (role === UserRole.UNASSIGNED) {
+      signOut();
+      navigate('/');
+      toast.error('Please wait for admin approval to log in!',
+        {
+          style: {
+              background: "white",
+              color: "black",
+          },
+          iconTheme: {
+              primary: "black",
+              secondary: "white",
+          },
+      });
+    }
+  }, [role, navigate, signOut]);
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center p-4">
@@ -85,41 +102,37 @@ const SignIn: React.FC = () => {
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <Label htmlFor="email">Email</Label>
-              <Input 
+              <Input
                 id="email"
-                type="email" 
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required 
+                required
                 placeholder="Enter your email"
-                className={errors.email ? "border-red-500" : ""}
+                className={errors.email ? 'border-red-500' : ''}
               />
               {errors.email && (
                 <p className="text-red-500 text-sm mt-1">{errors.email}</p>
               )}
             </div>
-            
+
             <div>
               <Label htmlFor="password">Password</Label>
-              <Input 
+              <Input
                 id="password"
-                type="password" 
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required 
+                required
                 placeholder="Enter your password"
-                className={errors.password ? "border-red-500" : ""}
+                className={errors.password ? 'border-red-500' : ''}
               />
               {errors.password && (
                 <p className="text-red-500 text-sm mt-1">{errors.password}</p>
               )}
             </div>
-            
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={loading}
-            >
+
+            <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Logging In...' : 'Log In'}
             </Button>
           </form>
