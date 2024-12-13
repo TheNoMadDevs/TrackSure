@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import Dashboard from '@pages/Seller/Dashboard';
 import Products from '@pages/Seller/Products';
 import Shipments from '@pages/Seller/Shipments';
-import Tracking from '@pages/Consumer/Tracking';
+import Tracking from '@pages/Seller/Tracking';
 
 const SellerRoutes = () => {
   return (

@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@lib/utils";
 import { Button } from "@components/ui/button";
 import { ScrollArea } from "@components/ui/scroll-area";
-import { Home, Users, FileText, TriangleAlert, Bell, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Home, ShoppingCart, LocateFixed, LogOut, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
+import { AuthContext } from "@context/AuthContext";
+import { toast } from "react-hot-toast";
 
 interface SidebarItem {
   name: string;
@@ -12,15 +14,43 @@ interface SidebarItem {
 }
 
 const sidebarItems: SidebarItem[] = [
-  { name: "Dashboard", icon: Home, href: "/" },
-  { name: "Product", icon: Users, href: "/product" },
-  { name: "Alerts", icon: TriangleAlert, href: "/alerts" },
-  { name: "Tracking", icon: FileText, href: "/Shipments" },
-  { name: "Shipment History", icon: Bell, href: "/History" },
+  { name: "Dashboard", icon: Home, href: "/seller/" },
+  { name: "Products", icon: ShoppingCart, href: "/seller/products" },
+  { name: "Tracking", icon: LocateFixed, href: "/seller/tracking" },
+  { name: "Shipment History", icon: FileText, href: "/seller/shipments" },
 ];
 
 const Sidebar: React.FC = () => {
   const [collapsed, setCollapsed] = useState<boolean>(false);
+  const { signOut } = useContext(AuthContext);  
+
+  const handleLogout = async () => {
+    try {
+      await signOut(); 
+      toast.success("Successfully logged out!", {
+        style: {
+          background: "white",
+          color: "black",
+        },
+        iconTheme: {
+          primary: "black",
+          secondary: "white",
+        },
+      });
+    } catch (err) {
+      console.log(err);
+      toast.error("Error logging out. Please try again.", {
+        style: {
+          background: "white",
+          color: "black",
+        },
+        iconTheme: {
+          primary: "red",
+          secondary: "white",
+        },
+      });
+    }
+  };
 
   return (
     <div className={cn(
@@ -40,7 +70,7 @@ const Sidebar: React.FC = () => {
         </nav>
       </ScrollArea>
       <div className="border-t p-2">
-        <Button variant="ghost" className="w-full justify-start">
+        <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
           <LogOut className={cn("h-5 w-5", collapsed ? "mr-0" : "mr-2")} />
           {!collapsed && <span>Logout</span>}
         </Button>
