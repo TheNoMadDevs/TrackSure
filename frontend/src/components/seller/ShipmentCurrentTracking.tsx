@@ -7,7 +7,8 @@ import {
   where, 
   getDocs, 
   doc, 
-  getDoc 
+  getDoc ,
+  onSnapshot
 } from "firebase/firestore";
 import app from "@services/firebase";
 import { Shipment, TrackingDetails } from "@schemas/shipmentSchema";
@@ -71,6 +72,20 @@ const TrackingPage = () => {
 
   useEffect(() => {
     fetchShipments();
+    if (shipmentId) {
+      const shipmentRef = doc(db, "shipments", shipmentId);
+      const unsubscribe = onSnapshot(shipmentRef, (doc) => {
+        if (doc.exists()) {
+          setSelectedShipment(doc.data() as Shipment);
+        } else {
+          console.error("Shipment not found!");
+          setSelectedShipment(null);
+        }
+      });
+
+      // Cleanup listener on component unmount
+      return () => unsubscribe();
+    }
   }, [shipmentId, userInfo?.uid]);
 
   const handleShipmentClick = (shipmentID: string) => {
