@@ -2,9 +2,10 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@components/ui/card";
 import { Thermometer } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer } from "recharts";
+import { Timestamp } from "firebase/firestore";
 
 interface TemperatureCardProps {
-  data: { time: string; temp: number }[];
+  data: { time: Timestamp; temp: number }[];
   currentTemp: number;
 }
 

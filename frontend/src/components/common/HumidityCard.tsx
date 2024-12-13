@@ -2,9 +2,10 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@components/ui/card";
 import { Droplets } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer } from "recharts";
+import { Timestamp } from "firebase/firestore";
 
 interface HumidityCardProps {
-  data: { time: string; humidity: number }[];
+  data: { time: Timestamp; humidity: number }[];
   currentHumidity: number;
 }
 

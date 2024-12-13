@@ -10,7 +10,7 @@ import {
   getDoc 
 } from "firebase/firestore";
 import app from "@services/firebase";
-import { Shipment } from "@schemas/shipmentSchema";
+import { Shipment, TrackingDetails } from "@schemas/shipmentSchema";
 import { Product } from "@schemas/productSchema";
 import { useAuthUser } from "@hooks/useAuthUser";
 import HumidityCard from '@components/common/HumidityCard';
@@ -122,78 +122,85 @@ const TrackingPage = () => {
   // Render shipment details
   const renderShipmentDetails = () => {
     if (!selectedShipment) return null;
-    
-    const tempData = [
-      { time: "00:00", temp: 2 },
-      { time: "04:00", temp: 3 },
-      { time: "08:00", temp: 5 },
-      { time: "12:00", temp: 4 },
-      { time: "16:00", temp: 3 },
-      { time: "20:00", temp: 2 },
-    ];
-    
-    const humidData = [
-      { time: "00:00", humidity: 70 },
-      { time: "04:00", humidity: 72 },
-      { time: "08:00", humidity: 75 },
-      { time: "12:00", humidity: 73 },
-      { time: "16:00", humidity: 71 },
-      { time: "20:00", humidity: 70 },
-    ];
 
-    const alerts = ['Humidity Less than 80%', 'Temperature More than 20']
+    const trackingDetails: TrackingDetails[] = selectedShipment.trackingDetails;
+    const tempData = trackingDetails.map(detail => ({
+      time: detail.lastUpdated,
+      temp: detail.temperature
+    }));
+
+    const humidData = trackingDetails.map(detail => ({
+      time: detail.lastUpdated,
+      humidity: detail.humidity
+    }));
+
+    const alerts = [
+      "Temperature is too high",
+      "Humidity is less than 80%",
+    ]
 
     return (
-        <div className="space-y-6">
-          {/* Shipment Information */}
-          <div className="rounded-lg border p-6 shadow-sm">
-            <h3 className="text-lg font-semibold mb-4 text-white border-b pb-2">Shipment Information</h3>
-            <div className="grid grid-cols-3 gap-2">
+      <div className="space-y-6">
+        {/* Shipment Information */}
+        <div className="rounded-lg border p-6 shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 text-white border-b pb-2">Shipment Information</h3>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { label: "Shipment ID", value: selectedShipment.shipmentID },
+              { label: "Order ID", value: selectedShipment.orderID },
+              { label: "Transporter ID", value: selectedShipment.transporterID },
+              { label: "Source", value: selectedShipment.source },
+              { label: "Destination", value: selectedShipment.destination },
+              // { label: "Delivery Date", value: selectedShipment.deliveryDate || "N/A" },
+              { 
+                label: "Status", 
+                value: selectedShipment.status, 
+                className: "text-blue-600 font-bold"
+              },
+            ].map(({ label, value, className }) => (
+              <div key={label}>
+                <p className="text-sm text-gray-500">{label}</p>
+                <p className={`font-semibold ${className || 'text-white'}`}>{value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <HumidityCard currentHumidity={humidData[0]?.humidity || 0} data={humidData} />
+          <TemperatureCard currentTemp={tempData[0]?.temp || 0} data={tempData} />
+          <AlertsCard alerts={alerts} />
+        </div>
+        <div>
+          {trackingDetails.length > 0 && (
+            <MapCard 
+              center={[
+                parseFloat(trackingDetails[0].currentLocation.latitude), 
+                parseFloat(trackingDetails[0].currentLocation.longitude)
+              ]} 
+              popupText="Current Location" 
+            />
+          )}
+        </div>
+
+        {/* Product Details */}
+        {product && (
+          <div className="rounded-lg border border-gray-200 p-6 shadow-sm">
+            <h3 className="text-lg font-semibold mb-4 text-white border-b pb-2">Product Details</h3>
+            <div className="grid">
               {[
-                { label: "Shipment ID", value: selectedShipment.shipmentID },
-                { label: "Order ID", value: selectedShipment.orderID },
-                { label: "Transporter ID", value: selectedShipment.transporterID },
-                { 
-                  label: "Status", 
-                  value: selectedShipment.status, 
-                  className: "text-blue-600 font-bold"
-                },
-              ].map(({ label, value, className }) => (
+                { label: "Product ID", value: product.productID },
+                { label: "Product Name", value: product.name },
+                { label: "Price", value: `$${product.price.toFixed(2)}` }
+              ].map(({ label, value }) => (
                 <div key={label}>
-                  <p className="text-sm text-gray-500">{label}</p>
-                  <p className={`font-semibold ${className || 'text-white'}`}>{value}</p>
+                  <p className="text-sm text-gray-500 mb-1">{label}</p>
+                  <p className="font-semibold text-white">{value}</p>
                 </div>
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-2">
-            <HumidityCard currentHumidity={72} data={humidData}/>
-            <TemperatureCard currentTemp={72} data={tempData}/>
-            <AlertsCard alerts={alerts}/>
-          </div>
-          <div>
-            <MapCard center={[51.505, -0.09]} popupText="Location" />
-          </div>
-
-          {/* Product Details */}
-          {product && (
-            <div className="rounded-lg border border-gray-200 p-6 shadow-sm">
-              <h3 className="text-lg font-semibold mb-4 text-white border-b pb-2">Product Details</h3>
-              <div className="grid">
-                {[
-                  { label: "Product ID", value: product.productID },
-                  { label: "Product Name", value: product.name },
-                  { label: "Price", value: `$${product.price.toFixed(2)}` }
-                ].map(({ label, value }) => (
-                  <div key={label}>
-                    <p className="text-sm text-gray-500 mb-1">{label}</p>
-                    <p className="font-semibold text-white">{value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        )}
+      </div>
     );
   };
 

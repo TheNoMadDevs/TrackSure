@@ -19,7 +19,7 @@ interface Shipment {
     sellerID: string;
     source: string;
     destination: string;
-    trackingDetails: TrackingDetails;
+    trackingDetails: TrackingDetails[];
     status: "pending" | "in-transit" | "delivered"; 
     deliveryDate: Timestamp; // timestamp
     createdAt: Timestamp; // timestamp
