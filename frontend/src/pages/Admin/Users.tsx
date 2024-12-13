@@ -1,6 +1,7 @@
 import Footer from "@components/common/Footer";
 import Header from "@components/common/Header";
 import Sidebar from "@components/admin/Sidebar";
+import Usercard from '@components/admin/Usercard';
 
 const Users = () => {
   return (
@@ -9,7 +10,16 @@ const Users = () => {
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header />
         <main className="flex-1 overflow-y-auto">
-          <div className="flex flex-col h-full">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 m-4 ">
+            <Usercard/>
+            <Usercard/>
+            <Usercard/>
+            <Usercard/>
+            <Usercard/>
+            <Usercard/>
+            <Usercard/>
+            <Usercard/>
+            <Usercard/>
           </div>
         </main>
         <Footer />
