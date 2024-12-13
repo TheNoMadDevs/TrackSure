@@ -62,6 +62,9 @@ const History = () => {
       const productData = productSnapshot.docs[0].data() as Product;
       const price = productData.price;
       const totalPrice = price * quantity;
+
+      productData.quantity -= quantity;
+      await updateDoc(productSnapshot.docs[0].ref, { quantity: productData.quantity });
   
       const orderRef = doc(collection(db, "orders"));
       const orderID = orderRef.id;
