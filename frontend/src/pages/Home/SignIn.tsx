@@ -95,8 +95,13 @@ const SignIn: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-center">Log In</CardTitle>
+      <CardHeader className="flex flex-col items-center">
+          <img 
+            src="/src/assets/logo-nobg-white.png" 
+            alt="Logo" 
+            className="h-36 w-36 mb-2"
+          />
+          <CardTitle className="text-center">Sign In</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
