@@ -35,12 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const userDocSnap = await getDoc(userDoc);
                 if (userDocSnap.exists()) {
                     const data = userDocSnap.data();
-                    if (Object.values(UserRole).includes(data?.role)) {
-                        setRole(data?.role as UserRole);
-                    } else {
-                        console.error("Invalid role");
-                        setRole(null);
-                    }
+                    setRole(data.role as UserRole);
                     setUserInfo(data as defaultUser);
                 }
             } else {
@@ -60,7 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             email: data.email,
             phoneNumber: data.phoneNumber,
             address: data.address,
-            role: null,
+            role: UserRole.UNASSIGNED,
             createdAt: new Date(),
         });
         return userCred.user;

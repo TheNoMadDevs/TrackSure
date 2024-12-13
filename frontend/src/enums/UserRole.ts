@@ -3,4 +3,5 @@ export enum UserRole {
     SELLER = 'seller',
     CONSUMER = 'consumer',
     TRANSPORTER = 'transporter',
+    UNASSIGNED = 'unassigned',
 }
