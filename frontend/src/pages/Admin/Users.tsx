@@ -20,6 +20,10 @@ const Users = () => {
       if (rfID) updateData.rfID = rfID;
       if (sensorID) updateData.sensorID = sensorID;
       await updateDoc(userDoc, updateData);
+      if (role === "transporter") {
+        const transporterDoc = doc(db, "transporters", uid);
+        await updateDoc(transporterDoc, { isAvailable: true });
+      }
       setUsers((prevUsers) => prevUsers.filter((user) => user.uid !== uid));
       toast.success("User updated successfully");
     } catch (error) {

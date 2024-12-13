@@ -13,7 +13,7 @@ interface HumidityRange {
 interface Product {
     productID: string;
     name: string;
-    supplierID: string;
+    sellerID: string;
     price: number;
     quantity: number;
     temperatureRange: TemperatureRange;

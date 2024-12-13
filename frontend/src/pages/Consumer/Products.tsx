@@ -3,15 +3,16 @@ import Header from "@components/common/Header";
 import Sidebar from "@components/consumer/Sidebar";
 import ProductCard from "@components/consumer/ProductsPage";
 import { useEffect, useState } from "react";
-import { getFirestore, collection, query, getDocs } from "firebase/firestore";
+import { getFirestore, collection, query, getDocs, setDoc, doc, where, updateDoc } from "firebase/firestore";
 import app from "@services/firebase";
 import { useAuthUser } from "@hooks/useAuthUser";
 import { Product } from "@schemas/productSchema";
 import toast from "react-hot-toast";
+import { defaultUser } from "@schemas/userSchema";
 
 const History = () => {
   const db = getFirestore(app);
-  const { user } = useAuthUser();
+  const { user, userInfo } = useAuthUser();
   const [products, setProducts] = useState<Product[]>([]);
 
   const fetchProducts = async () => {
@@ -33,10 +34,70 @@ const History = () => {
     }
   };
 
+  const assignTransporter = async (shipmentID: string) => {
+    try {
+      const transporterRef = collection(db, "transporters");
+      const availableTransportersQuery = query(transporterRef, where("isAvailable", "==", true));
+      const availableTransportersSnapshot = await getDocs(availableTransportersQuery);
+      if (!availableTransportersSnapshot.empty) {
+        const transporterDoc = availableTransportersSnapshot.docs[0];
+        const transporterID = transporterDoc.id;
+        await updateDoc(transporterDoc.ref, { isAvailable: false, currentShipmentID: shipmentID });
+        return transporterID;
+      } else {
+        // TODO: Queue shipment
+        console.log("No transporters available. Shipment will be queued.");
+      }
+    } catch (error) {
+      console.error("Error assigning transporter: ", error);
+    }
+  };
+
   const handleBuy = async (productID: string, quantity: number) => {
     try {
-      // TODO: Implement buying product
-      console.log("Buying product: ", productID, quantity);
+      const productRef = collection(db, "products");
+      const productQuery = query(productRef, where("productID", "==", productID));
+      const productSnapshot = await getDocs(productQuery);  
+      const productData = productSnapshot.docs[0].data() as Product;
+      const price = productData.price;
+      const totalPrice = price * quantity;
+  
+      const orderRef = doc(collection(db, "orders"));
+      const orderID = orderRef.id;
+      const shipmentRef = doc(collection(db, "shipments"));
+      const shipmentID = shipmentRef.id;
+
+      const sellerRef = collection(db, "users");
+      const sellerQuery = query(sellerRef, where("uid", "==", productData.sellerID));
+      const sellerSnapshot = await getDocs(sellerQuery);
+      const sellerData = sellerSnapshot.docs[0].data() as defaultUser;
+
+      const orderData = {
+        orderID,
+        consumerID: userInfo!.uid,
+        supplierID: productData.sellerID,
+        productID,
+        quantity,
+        price: totalPrice,
+        delivered: false,
+        createdAt: new Date(),
+        shipmentID,
+      };
+  
+      await setDoc(doc(db, "orders", orderID), orderData);
+  
+      const transporterID = await assignTransporter(shipmentID);
+      const shipmentData = {
+        shipmentID,
+        orderID,
+        transporterID,
+        source: sellerData.address,
+        destination: userInfo!.address,
+        trackingDetails: [],
+        status: "pending",
+        deliveryDate: null,
+      };
+      await setDoc(doc(db, "shipments", shipmentID), shipmentData);
       toast.success("Order placed successfully");
     } catch (error) {
       console.error("Error buying product: ", error);
