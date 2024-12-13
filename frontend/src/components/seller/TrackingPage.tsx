@@ -4,26 +4,26 @@ import app from "@services/firebase";  // Adjust the path based on your project 
 import { Shipment } from "@schemas/shipmentSchema";
 import { useAuthUser } from "@hooks/useAuthUser";
 
-const ShipmentHistory = () => {
+const TrackingPage = () => {
   const db = getFirestore(app);
   const { userInfo } = useAuthUser();
-  const [shipmentHistory, setShipmentHistory] = useState<Shipment[]>([]);
+  const [tracking, setTracking] = useState<Shipment[]>([]);
 
   const fetchShipments = async () => {
     try {
-      const shipmentsQuery = query(
+      const trackingQuery = query(
         collection(db, "shipments"),
-        where("status", "==", "delivered"),
+        where("status", "in", ["pending", "in-transit"]),
         where("sellerID", "==", userInfo?.uid)
       );
-      const querySnapshot = await getDocs(shipmentsQuery);
+      const querySnapshot = await getDocs(trackingQuery);
       const fetchedShipments: Shipment[] = [];
 
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         fetchedShipments.push(data as Shipment);
       });
-      setShipmentHistory(fetchedShipments);
+      setTracking(fetchedShipments);
     } catch (error) {
       console.error("Error fetching shipments: ", error);
     }
@@ -36,13 +36,13 @@ const ShipmentHistory = () => {
   return (
     <div className="w-full max-w-3xl h-full">
       <div className="border-b p-4">
-        <h2 className="text-xl font-bold">Shipment History</h2>
+        <h2 className="text-xl font-bold items-center justify-center">Tracking</h2>
       </div>
-      <div className="p-4">
+      <div className="p-4 onClick={}">
         <div className="h-full w-full">
           <div className="space-y-4">
-            {shipmentHistory.length > 0 ? (
-              shipmentHistory.map((shipment) => (
+            {tracking.length > 0 ? (
+              tracking.map((shipment) => (
                 <div
                   key={shipment.shipmentID}
                   className="flex flex-col space-y-2 w-full rounded-lg border p-4 shadow-sm"
@@ -62,6 +62,9 @@ const ShipmentHistory = () => {
                   <div className="text-sm text-gray-500">
                     Transporter ID: {shipment.transporterID}
                   </div>
+                  <div className="text-sm text-gray-500">
+                    Status: {shipment.status}
+                  </div>
                 </div>
               ))
             ) : (
@@ -74,4 +77,4 @@ const ShipmentHistory = () => {
   );
 };
 
-export default ShipmentHistory;
+export default TrackingPage;
