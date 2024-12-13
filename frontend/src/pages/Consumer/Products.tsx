@@ -76,7 +76,7 @@ const History = () => {
       const orderData = {
         orderID,
         consumerID: userInfo!.uid,
-        supplierID: productData.sellerID,
+        sellerID: productData.sellerID,
         productID,
         quantity,
         price: totalPrice,
@@ -92,6 +92,7 @@ const History = () => {
         shipmentID,
         orderID,
         transporterID,
+        sellerID: productData.sellerID,
         source: sellerData.address,
         destination: userInfo!.address,
         trackingDetails: [],
