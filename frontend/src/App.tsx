@@ -6,11 +6,14 @@ import HomePage from '@pages/Home/HomePage';
 import SignUp from '@pages/Home/SignUp';
 import SignIn from '@pages/Home/SignIn';
 import { ThemeProvider } from '@components/common/ThemeProvider';
+import { Toaster } from "react-hot-toast";
+
 
 
 const App = () => {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <Toaster position="top-right" />
       <Routes>
         <Route index element={<HomePage />} />
         <Route path="/signin" element={<SignIn />} />

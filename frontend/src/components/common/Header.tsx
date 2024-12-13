@@ -15,7 +15,7 @@ const Header: React.FC = () => {
     <header className="border-b">
       <div className="flex items-center justify-between px-6 py-3 h-[80px]">
         <div className="flex items-center">
-          <Link to={"/"}>
+          <Link to={""}>
              <img src={logoSrc} alt="Logo" className="h-[100px]" />
           </Link>
           <span className="text-xl font-bold">TrackSure</span>

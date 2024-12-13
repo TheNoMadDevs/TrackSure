@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@lib/utils";
 import { Button } from "@components/ui/button";
 import { ScrollArea } from "@components/ui/scroll-area";
 import { Home, Users, FileText, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { AuthContext } from "@context/AuthContext";
+import { toast } from "react-hot-toast";
 
 interface SidebarItem {
   name: string;
@@ -19,6 +21,35 @@ const sidebarItems: SidebarItem[] = [
 
 const Sidebar: React.FC = () => {
   const [collapsed, setCollapsed] = useState<boolean>(false);
+  const { signOut } = useContext(AuthContext);  
+
+  const handleLogout = async () => {
+    try {
+      await signOut(); 
+      toast.success("Successfully logged out!", {
+        style: {
+          background: "white",
+          color: "black",
+        },
+        iconTheme: {
+          primary: "black",
+          secondary: "white",
+        },
+      });
+    } catch (err) {
+      console.log(err);
+      toast.error("Error logging out. Please try again.", {
+        style: {
+          background: "white",
+          color: "black",
+        },
+        iconTheme: {
+          primary: "red",
+          secondary: "white",
+        },
+      });
+    }
+  };
 
   return (
     <div className={cn(
@@ -38,7 +69,7 @@ const Sidebar: React.FC = () => {
         </nav>
       </ScrollArea>
       <div className="border-t p-2">
-        <Button variant="ghost" className="w-full justify-start">
+        <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
           <LogOut className={cn("h-5 w-5", collapsed ? "mr-0" : "mr-2")} />
           {!collapsed && <span>Logout</span>}
         </Button>

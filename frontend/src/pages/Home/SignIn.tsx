@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
 import { userSignInSchema, userSignInType } from '@schemas/userSchema';
 import { useAuthActions } from '@hooks/useAuthActions';
 import { useAuthUser } from '@hooks/useAuthUser';
+import toast from 'react-hot-toast';
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -60,7 +61,16 @@ const SignIn: React.FC = () => {
     if (role) {
       navigate('/' + role);
     } else if (user) {
-      // TODO: Toast notification
+      toast.success("Successfully logged in!", {
+        style: {
+          background: "white",
+          color: "black",
+        },
+        iconTheme: {
+          primary: "black",
+          secondary: "white",
+        },
+      });
       navigate('/');
     }
   }, [user, role, navigate]);
