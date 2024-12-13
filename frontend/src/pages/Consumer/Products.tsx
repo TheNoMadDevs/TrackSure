@@ -64,8 +64,7 @@ const History = () => {
       const totalPrice = price * quantity;
 
       productData.quantity -= quantity;
-      await updateDoc(productSnapshot.docs[0].ref, { quantity: productData.quantity });
-  
+
       const orderRef = doc(collection(db, "orders"));
       const orderID = orderRef.id;
       const shipmentRef = doc(collection(db, "shipments"));
@@ -87,9 +86,7 @@ const History = () => {
         createdAt: new Date(),
         shipmentID,
       };
-  
-      await setDoc(doc(db, "orders", orderID), orderData);
-  
+
       const transporterID = await assignTransporter(shipmentID);
       const shipmentData = {
         shipmentID,
@@ -102,7 +99,10 @@ const History = () => {
         status: "pending",
         deliveryDate: null,
       };
+      await setDoc(doc(db, "orders", orderID), orderData);
       await setDoc(doc(db, "shipments", shipmentID), shipmentData);
+      await updateDoc(productSnapshot.docs[0].ref, { quantity: productData.quantity });
+
       toast.success("Order placed successfully");
       fetchProducts();
     } catch (error) {

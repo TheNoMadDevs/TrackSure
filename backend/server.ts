@@ -141,7 +141,7 @@ setInterval(
         await pollSensors();
         await pollRfIDs();
     },
-    5000
+    20000
 );
 
 pollSensors();
