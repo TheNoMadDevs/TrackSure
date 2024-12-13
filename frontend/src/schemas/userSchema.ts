@@ -2,6 +2,7 @@ import { UserRole } from '@enums/UserRole';
 import { z } from 'zod';
 
 interface defaultUser {
+    uid: string;
     email: string;
     password: string;
     name: string;
