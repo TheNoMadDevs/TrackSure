@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 interface Location {
     latitude: string;
     longitude: string;
@@ -7,19 +9,20 @@ interface Location {
     currentLocation: Location;
     temperature: number;
     humidity: number;
-    lastUpdated: number; // timestamp
+    lastUpdated: Timestamp; // timestamp
 }
   
 interface Shipment {
     shipmentID: string;
     orderID: string;
     transporterID: string;
+    sellerID: string;
     source: string;
     destination: string;
     trackingDetails: TrackingDetails;
     status: "pending" | "in-transit" | "delivered"; 
-    deliveryDate: number; // timestamp
-    createdAt: number; // timestamp
+    deliveryDate: Timestamp; // timestamp
+    createdAt: Timestamp; // timestamp
 }
 
 export type { Location, TrackingDetails, Shipment };

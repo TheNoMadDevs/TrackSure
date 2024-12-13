@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 interface Order {
     orderID: string;
     consumerID: string;
@@ -6,7 +8,7 @@ interface Order {
     quantity: number;
     price: number;
     status: "pending" | "confirmed" | "cancelled";
-    createdAt: number; // timestamp
+    createdAt: Timestamp; // timestamp
     shipmentID: string; // Reference to the shipment
 }
 

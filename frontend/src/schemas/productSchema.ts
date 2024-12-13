@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 interface TemperatureRange {
     min: number;
     max: number;
@@ -16,9 +18,9 @@ interface Product {
     quantity: number;
     temperatureRange: TemperatureRange;
     humidityRange: HumidityRange;
-    expiryDate: number;
-    createdAt: number;
-    updatedAt: number;
+    expiryDate: Timestamp;
+    createdAt: Timestamp;
+    updatedAt: Timestamp;
     imageURL: string;
 }
 

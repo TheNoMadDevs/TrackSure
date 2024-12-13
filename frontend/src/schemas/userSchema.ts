@@ -1,4 +1,5 @@
 import { UserRole } from '@enums/UserRole';
+import { Timestamp } from 'firebase/firestore';
 import { z } from 'zod';
 
 interface defaultUser {
@@ -9,7 +10,7 @@ interface defaultUser {
     phoneNumber: string;
     address: string;
     role: UserRole | null;
-    createdAt: Date;
+    createdAt: Timestamp;
     rfID?: string;
     sensorID?: string;
 }

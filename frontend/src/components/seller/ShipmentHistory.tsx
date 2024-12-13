@@ -1,39 +1,38 @@
-const ShipmentHistory = () => {
-  const shipmentHistory = [
-    {
-      shipmentId: "SH001",
-      orderId: "ORD123",
-      productName: "Wireless Headphones",
-      transporterId: "TR789",
-      status: "Delivered",
-      date: "12-1-2024"
-    },
-    {
-      shipmentId: "SH002",
-      orderId: "ORD124",
-      productName: "Smart Watch",
-      transporterId: "TR790",
-      status: "In Transit",
-      date: "12-1-2024"
-    },
-    {
-      shipmentId: "SH003",
-      orderId: "ORD125",
-      productName: "Laptop",
-      transporterId: "TR791",
-      status: "Pending",
-      date: "12-1-2024"
-    },
-    {
-      shipmentId: "SH004",
-      orderId: "ORD126",
-      productName: "Smartphone",
-      transporterId: "TR792",
-      status: "Cancelled",
-      date: "12-1-2024"
-    },
-  ];
+import { useEffect, useState } from "react";
+import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
+import app from "@services/firebase";  // Adjust the path based on your project structure
+import { Shipment } from "@schemas/shipmentSchema";
+import { useAuthUser } from "@hooks/useAuthUser";
 
+const ShipmentHistory = () => {
+  const db = getFirestore(app);
+  const { userInfo } = useAuthUser();
+  const [shipmentHistory, setShipmentHistory] = useState<Shipment[]>([]);
+
+  const fetchShipments = async () => {
+    try {
+      const shipmentsQuery = query(
+        collection(db, "shipments"),
+        where("status", "==", "delivered"),
+        where("sellerID", "==", userInfo?.uid)
+      );
+      const querySnapshot = await getDocs(shipmentsQuery);
+      const fetchedShipments: Shipment[] = [];
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        console.log(data);
+        fetchedShipments.push(data as Shipment);
+      });
+      setShipmentHistory(fetchedShipments);
+    } catch (error) {
+      console.error("Error fetching shipments: ", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchShipments();
+  }, [db]);
 
   return (
     <div className="w-full max-w-3xl h-full">
@@ -43,35 +42,37 @@ const ShipmentHistory = () => {
       <div className="p-4">
         <div className="h-full w-full">
           <div className="space-y-4">
-            {shipmentHistory.map((shipment) => (
-              <div
-                key={shipment.shipmentId}
-                className="flex flex-col space-y-2 w-full rounded-lg border p-4 shadow-sm"
-              >
-                <div className="flex justify-between w-full">
-                  <span className="font-semibold">
-                    Shipment ID: {shipment.shipmentId}
-                  </span>
-                  <span
-                    className={`px-2 py-1 rounded text-white bg-blue-700 `}
-                  >
-                    {shipment.date}
-                  </span>
+            {shipmentHistory.length > 0 ? (
+              shipmentHistory.map((shipment) => (
+                <div
+                  key={shipment.shipmentID}
+                  className="flex flex-col space-y-2 w-full rounded-lg border p-4 shadow-sm"
+                >
+                  <div className="flex justify-between w-full">
+                    <span className="font-semibold">
+                      Shipment ID: {shipment.shipmentID}
+                    </span>
+                    <span className="px-2 py-1 rounded text-white bg-blue-700">
+                      {shipment.deliveryDate.toDate().toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    Order ID: {shipment.orderID}
+                  </div>
+                  {/* <div className="font-medium">{shipment.productName}</div> */}
+                  <div className="text-sm text-gray-500">
+                    Transporter ID: {shipment.transporterID}
+                  </div>
                 </div>
-                <div className="text-sm text-gray-500">
-                  Order ID: {shipment.orderId}
-                </div>
-                <div className="font-medium">{shipment.productName}</div>
-                <div className="text-sm text-gray-500">
-                  Transporter ID: {shipment.transporterId}
-                </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p>No shipments delivered.</p>
+            )}
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default ShipmentHistory;
