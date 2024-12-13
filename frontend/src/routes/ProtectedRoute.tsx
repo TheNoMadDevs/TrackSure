@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 
 import { useAuthUser } from '@hooks/useAuthUser';
+import toast from 'react-hot-toast';
 
 interface ProtectedRouteProps {
     element: React.ReactNode;
@@ -14,11 +15,21 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element, roles }) => {
     if (!user) {
         return <Navigate to='/signin' />;
     }
-    if (!role) {
-        return <Navigate to='/signin' />;
-    }
-    if (!roles.includes(role)) {
-        return <Navigate to='/' replace />;
+    if (!role || !roles.includes(role)) {
+        toast.error(
+            "You don't have access yet, please contact admin for access!!",
+            {
+                style: {
+                    background: "white",
+                    color: "black",
+                },
+                iconTheme: {
+                    primary: "black",
+                    secondary: "white",
+                },
+            }
+        );
+        return <Navigate to='/' />;
     }
     return <>{element}</>;
 };

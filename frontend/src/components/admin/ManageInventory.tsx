@@ -12,8 +12,8 @@ const ManageInventoryCard: React.FC = () => {
               <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-              <div className="text-2xl font-bold">Manage Users</div>
-              <p className="text-xs text-muted-foreground">User manage</p>
+              <div className="text-2xl font-bold">Manage Inventory</div>
+              <p className="text-xs text-muted-foreground">Manage Inventory</p>
           </CardContent>
         </Card>
     </Link>
