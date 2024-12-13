@@ -11,7 +11,7 @@ interface Location {
 }
   
 interface Shipment {
-    id: string;
+    shipmentID: string;
     orderID: string;
     transporterID: string;
     source: string;

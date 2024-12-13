@@ -1,5 +1,5 @@
 interface Order {
-    id: string;
+    orderID: string;
     consumerID: string;
     supplierID: string;
     product: string; // productID
