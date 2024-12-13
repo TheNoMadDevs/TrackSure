@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@components/ui/button';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogTrigger,
   DialogFooter,
-  DialogClose 
+  DialogClose,
 } from '@components/ui/dialog';
 import { Input } from '@components/ui/input';
 import { Label } from '@components/ui/label';
@@ -18,24 +18,25 @@ interface ProductCardProps {
   name: string;
   image: string;
   price: number;
-  onBuy: (quantity: number, price: number) => void;
+  quantity: number;
+  onSave: (quantity: number, price: number) => void;
   onRemove: () => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ 
-  name, 
-  image, 
-  price, 
-  onBuy, 
-  onRemove 
+const ProductCard: React.FC<ProductCardProps> = ({
+  name,
+  image,
+  price,
+  quantity,
+  onSave,
+  onRemove,
 }) => {
-  const [quantity, setQuantity] = useState(1);
   const [editedPrice, setEditedPrice] = useState(price);
   const [editedQuantity, setEditedQuantity] = useState(quantity);
 
+  // handle save and trigger onSave callback
   const handleSave = () => {
-    setQuantity(editedQuantity);
-    onBuy(editedQuantity, editedPrice);
+    onSave(editedQuantity, editedPrice);  // Save the edited values
   };
 
   return (
@@ -50,10 +51,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </div>
         <h3 className="text-sm font-semibold mb-1">{name}</h3>
         <p className="text-base font-bold mb-2">₹{price.toFixed(2)}</p>
-        
+
         <div className="flex items-center justify-between mb-1">
-          <span className="text-sm font-semibold">Qty: {quantity}</span>
-          
+          <span className="text-sm font-semibold">Qty: {Number(quantity)}</span>
+
           <div className="flex items-center space-x-2">
             <Dialog>
               <DialogTrigger asChild>
@@ -99,17 +100,17 @@ const ProductCard: React.FC<ProductCardProps> = ({
                     </Button>
                   </DialogClose>
                   <DialogClose asChild>
-                    <Button type="submit" onClick={handleSave}>
+                    <Button type="button" onClick={handleSave}>
                       Save
                     </Button>
                   </DialogClose>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-            
-            <Button 
-              variant="outline" 
-              size="icon" 
+
+            <Button
+              variant="outline"
+              size="icon"
               className="h-7 w-7"
               onClick={onRemove}
             >
