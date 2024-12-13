@@ -2,7 +2,6 @@ import Footer from "@components/common/Footer";
 import Header from "@components/common/Header";
 import Sidebar from "@components/admin/Sidebar";
 import ManageUserCard from "@components/admin/ManageUserCard";
-import ManageInventoryCard from '@components/admin/ManageInventory';
 import { useAuthUser } from "@hooks/useAuthUser";
 
 const Dashboard = () => {
@@ -23,7 +22,6 @@ const Dashboard = () => {
             <div className="flex-1 p-4">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2 my-4">
                 <ManageUserCard />
-                <ManageInventoryCard />
               </div>
             </div>
           </div>
