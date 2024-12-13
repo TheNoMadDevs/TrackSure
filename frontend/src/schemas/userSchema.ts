@@ -10,6 +10,8 @@ interface defaultUser {
     address: string;
     role: UserRole | null;
     createdAt: Date;
+    rfID?: string;
+    sensorID?: string;
 }
 
 const userSignUpSchema = z.object({
