@@ -132,3 +132,6 @@ dist
 
 # MacOS specifics
 .DS_Store
+
+# Service account
+account.json
