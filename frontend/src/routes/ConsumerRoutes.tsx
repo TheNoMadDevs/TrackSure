@@ -4,6 +4,7 @@ import Dashboard from '@pages/Consumer/Dashboard';
 import Products from '@pages/Consumer/Products';
 import History from '@pages/Consumer/History';
 import Tracking from '@pages/Consumer/Tracking';
+import ShipmentCurrentTracking from '@components/consumer/CurrentShipmentTracking';
 
 const ConsumerRoutes = () => {
   return (
@@ -13,6 +14,7 @@ const ConsumerRoutes = () => {
       <Route path="products" element={<Products />} />
       <Route path="history" element={<History />} />
       <Route path="tracking" element={<Tracking/>} />
+      <Route path="tracking/:shipmentId" element={<ShipmentCurrentTracking />} />
     </Routes>
   );
 };

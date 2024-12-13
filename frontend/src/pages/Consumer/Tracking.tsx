@@ -1,6 +1,7 @@
 import Footer from "@components/common/Footer";
 import Header from "@components/common/Header";
 import Sidebar from "@components/consumer/Sidebar";
+import CurrentShipmentTracking from "@components/consumer/CurrentShipmentTracking";
 
 const Tracking = () => {
 
@@ -13,7 +14,7 @@ const Tracking = () => {
           <div className="flex flex-col h-full">
             <div className="flex-1 p-4">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2 my-4">
-
+                <CurrentShipmentTracking />
               </div>
             </div>
           </div>
