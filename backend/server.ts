@@ -55,14 +55,14 @@ async function pollRfIDs(): Promise<void> {
                 const sensorValue = await getSensorData(rfID, 'V0');
                 if (sensorValue === 1) {
                     console.log(`Sensor value is 1 for user: ${userData.name}. Updating shipment status to 'in-transit'.`);
-                    const shipmentsSnapshot = await db.collection('SHIPMENTS')
-                    .where('transporterId', '==', userData.uid)
+                    const shipmentsSnapshot = await db.collection('shipments')
+                    .where('transporterID', '==', userData.uid)
                     .where('status', '==', 'pending')
                     .get();
                     if (!shipmentsSnapshot.empty) {
                         const shipment = shipmentsSnapshot.docs[0];
                         const shipmentId = shipment.id;
-                        await db.collection('SHIPMENTS').doc(shipmentId).update({
+                        await db.collection('shipments').doc(shipmentId).update({
                             status: 'in-transit',
                         });
                         console.log(`Shipment ${shipmentId} status updated to 'in-transit'.`);

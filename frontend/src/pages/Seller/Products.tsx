@@ -26,7 +26,6 @@ const History = () => {
   const db = getFirestore(app);
   const { user } = useAuthUser();
   const [products, setProducts] = useState<Product[]>([]);
-  const [date, setDate] = useState<Date>()
   const [open, setOpen] = useState(false); // State to manage the dialog box visibility
   const [newProduct, setNewProduct] = useState({
     name: "",
@@ -34,6 +33,7 @@ const History = () => {
     quantity: 0,
     temperatureRange: { min: 0, max: 0 },
     humidityRange: { min: 0, max: 0 },
+    // expiryDate: undefined,
     expiryDate: new Date(),
     imageURL: "",
   });
@@ -217,18 +217,18 @@ const History = () => {
                               variant={"outline"}
                               className={cn(
                                 "w-[280px] justify-start text-left font-normal",
-                                !date && "text-muted-foreground"
+                                !newProduct.expiryDate && "text-muted-foreground"
                               )}
                             >
                               <CalendarIcon />
-                              {date ? format(date, "PPP") : <span>Pick a date</span>}
+                              {newProduct.expiryDate ? format(newProduct.expiryDate, "PPP") : <span>Pick a date</span>}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0">
                             <Calendar
                               mode="single"
-                              selected={date}
-                              onSelect={setDate}
+                              selected={newProduct.expiryDate}
+                              onSelect={(e) => setNewProduct({ ...newProduct, expiryDate: e })}
                               initialFocus
                             />
                           </PopoverContent>
