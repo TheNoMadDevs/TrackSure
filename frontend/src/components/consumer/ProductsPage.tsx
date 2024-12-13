@@ -1,33 +1,43 @@
 import React, { useState } from 'react';
-import { Minus, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@components/ui/button';
-import { Card, CardContent, CardFooter } from '@components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from '@components/ui/dialog';
+import { Input } from '@components/ui/input';
+import { Label } from '@components/ui/label';
+import { Card, CardContent } from '@components/ui/card';
 
 interface ProductCardProps {
   name: string;
   image: string;
   price: number;
-  onBuy: (quantity: number) => void;
-  onRemove: () => void;
+  quantity: number;
+  onBuy: (quantity: number) => void; // Callback with quantity
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ 
-  name, 
-  image, 
-  price, 
-  onBuy, 
-  onRemove 
+const ProductCard: React.FC<ProductCardProps> = ({
+  name,
+  image,
+  price,
+  quantity,
+  onBuy,
 }) => {
-  const [quantity, setQuantity] = useState(1);
-  const incrementQuantity = () => setQuantity(prev => prev + 1);
-  const decrementQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
+
+  // Handle buy action
   const handleBuy = () => {
-    onBuy(quantity);
+    onBuy(selectedQuantity); // Call the parent function with selected quantity
   };
 
   return (
     <Card className="w-full max-w-xs">
-      <CardContent className="p-2">
+      <CardContent className="p-2 relative">
         <div className="aspect-square relative mb-2">
           <img
             src={image}
@@ -37,24 +47,49 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </div>
         <h3 className="text-sm font-semibold mb-1">{name}</h3>
         <p className="text-base font-bold mb-2">₹{price.toFixed(2)}</p>
-        <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center">
-            <Button variant="outline" size="icon" className="h-7 w-7" onClick={decrementQuantity}>
-              <Minus className="h-3 w-3" />
-            </Button>
-            <span className="mx-2 text-sm font-semibold">{quantity}</span>
-            <Button variant="outline" size="icon" className="h-7 w-7" onClick={incrementQuantity}>
-              <Plus className="h-3 w-3" />
-            </Button>
-          </div>
-          <Button variant="destructive" size="icon" className="h-7 w-7" onClick={onRemove}>
-            <Trash2 className="h-3 w-3" />
-          </Button>
+
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold">Qty: {Number(quantity)}</span>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="default">Buy</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Enter Quantity</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="quantity" className="text-right">
+                    Quantity
+                  </Label>
+                  <Input
+                    id="quantity"
+                    type="number"
+                    min={1}
+                    max={quantity}
+                    value={selectedQuantity}
+                    onChange={(e) => setSelectedQuantity(Number(e.target.value))}
+                    className="col-span-3"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button type="button" variant="secondary">
+                    Cancel
+                  </Button>
+                </DialogClose>
+                <DialogClose asChild>
+                  <Button type="button" onClick={handleBuy}>
+                    Confirm Buy
+                  </Button>
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </CardContent>
-      <CardFooter className="p-2">
-        <Button className="w-full h-8 text-xs" onClick={handleBuy}></Button>
-      </CardFooter>
     </Card>
   );
 };

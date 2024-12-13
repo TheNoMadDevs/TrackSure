@@ -4,10 +4,10 @@ interface Order {
     orderID: string;
     consumerID: string;
     supplierID: string;
-    product: string; // productID
+    productID: string; // productID
     quantity: number;
     price: number;
-    status: "pending" | "confirmed" | "cancelled";
+    delivered: boolean;
     createdAt: Timestamp; // timestamp
     shipmentID: string; // Reference to the shipment
 }
