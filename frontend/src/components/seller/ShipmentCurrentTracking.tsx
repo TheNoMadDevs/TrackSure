@@ -13,7 +13,7 @@ import app from "@services/firebase";
 import { Shipment } from "@schemas/shipmentSchema";
 import { Product } from "@schemas/productSchema";
 import { useAuthUser } from "@hooks/useAuthUser";
-import HumidityCard from '../common/HumidityCard';
+import HumidityCard from '@components/common/HumidityCard';
 import TemperatureCard from "@components/common/TemperatureCard";
 import AlertsCard from "@components/common/AlertsCard";
 import MapCard from "@components/common/MapCard";
@@ -141,12 +141,14 @@ const TrackingPage = () => {
       { time: "20:00", humidity: 70 },
     ];
 
+    const alerts = ['Humidity Less than 80%', 'Temperature More than 20']
+
     return (
         <div className="space-y-6">
           {/* Shipment Information */}
-          <div className="rounded-lg border border-gray-200 p-6 shadow-sm">
+          <div className="rounded-lg border p-6 shadow-sm">
             <h3 className="text-lg font-semibold mb-4 text-white border-b pb-2">Shipment Information</h3>
-            <div className="grid grid-cols-3 gap-1">
+            <div className="grid grid-cols-3 gap-2">
               {[
                 { label: "Shipment ID", value: selectedShipment.shipmentID },
                 { label: "Order ID", value: selectedShipment.orderID },
@@ -156,10 +158,6 @@ const TrackingPage = () => {
                   value: selectedShipment.status, 
                   className: "text-blue-600 font-bold"
                 },
-                { 
-                  label: "Delivery Date", 
-                  value: selectedShipment.deliveryDate.toDate().toLocaleDateString() 
-                }
               ].map(({ label, value, className }) => (
                 <div key={label}>
                   <p className="text-sm text-gray-500">{label}</p>
@@ -168,10 +166,10 @@ const TrackingPage = () => {
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-3">
+          <div className="grid grid-cols-3 gap-2">
             <HumidityCard currentHumidity={72} data={humidData}/>
             <TemperatureCard currentTemp={72} data={tempData}/>
-            <AlertsCard alerts={[]}/>
+            <AlertsCard alerts={alerts}/>
           </div>
           <div>
             <MapCard center={[51.505, -0.09]} popupText="Location" />
@@ -200,7 +198,7 @@ const TrackingPage = () => {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto h-full">
+    <div className="w-full h-full">
       <div className=" p-4 flex items-center">
         <button 
           onClick={handleBackClick} 

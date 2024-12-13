@@ -48,7 +48,7 @@ const MapCard: React.FC<MapCardProps> = ({
   return (
     <Card className="col-span-2">
       <CardHeader>
-        <CardTitle>Shipment Locations</CardTitle>
+        <CardTitle>Shipment Location</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         <div className="h-[300px]">
