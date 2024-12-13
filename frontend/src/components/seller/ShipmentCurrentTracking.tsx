@@ -96,9 +96,6 @@ const TrackingPage = () => {
               <span className="font-semibold text-white">
                 Shipment ID: {shipment.shipmentID}
               </span>
-              <span className="px-2 py-1 rounded text-white bg-blue-600 text-xs">
-                {shipment.deliveryDate.toDate().toLocaleDateString()}
-              </span>
             </div>
             <div className="grid grid-cols-3 gap-2 text-sm text-gray-600">
               <div>Order ID: {shipment.orderID}</div>

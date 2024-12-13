@@ -104,6 +104,7 @@ const History = () => {
       };
       await setDoc(doc(db, "shipments", shipmentID), shipmentData);
       toast.success("Order placed successfully");
+      fetchProducts();
     } catch (error) {
       console.error("Error buying product: ", error);
     }
