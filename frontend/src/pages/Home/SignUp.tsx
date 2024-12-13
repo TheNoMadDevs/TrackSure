@@ -6,6 +6,7 @@ import { Input } from '@components/ui/input';
 import { Label } from '@components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
 import { useAuthActions } from '@hooks/useAuthActions';
+import toast from 'react-hot-toast';
 
 export const SignUp: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -68,7 +69,17 @@ export const SignUp: React.FC = () => {
         address: formData.address
       });
       // Handle successful signup (e.g., redirect)
-      // TODO: Toast notification
+      toast.success('Successfully Signed up!',
+        {
+          style: {
+              background: "white",
+              color: "black",
+          },
+          iconTheme: {
+              primary: "black",
+              secondary: "white",
+          },
+        })
       navigate('/signin');
     } catch (error) {
       console.error('Signup failed:', error);
@@ -85,8 +96,13 @@ export const SignUp: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-center">Create an Account</CardTitle>
+      <CardHeader className="flex flex-col items-center">
+          <img 
+            src="/src/assets/logo-nobg-white.png" 
+            alt="Logo" 
+            className="h-36 w-36 mb-2"
+          />
+          <CardTitle className="text-center">Sign In</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
