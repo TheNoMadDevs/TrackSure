@@ -3,13 +3,11 @@ import Header from "@components/common/Header";
 import Sidebar from "@components/admin/Sidebar";
 import ManageUserCard from "@components/admin/ManageUserCard";
 import ManageInventoryCard from '@components/admin/ManageInventory';
-
-const fetchUserName = () => {
-  // TODO - Fetch UserName from Firebase
-  return "ADMIN";
-}
+import { useAuthUser } from "@hooks/useAuthUser";
 
 const Dashboard = () => {
+  const { userInfo } = useAuthUser();
+
   return (
     <div className="flex h-screen bg-background">
       <Sidebar />
@@ -19,7 +17,7 @@ const Dashboard = () => {
           <div className="flex flex-col h-full">
             <div className="flex-1 flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600">
               <h1 className="text-6xl font-bold text-white text-center px-4">
-                HELLO, {fetchUserName()}!
+                HELLO, {userInfo?.name}!
               </h1>
             </div>
             <div className="flex-1 p-4">
