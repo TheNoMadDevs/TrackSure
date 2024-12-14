@@ -195,15 +195,15 @@ async function setAlerts(): Promise<void> {
 }
 
 
-// setInterval(
-//     async () => {
-//         await pollSensors();
-//         await pollRfIDs();
-//     },
-//     20000
-// );
+setInterval(
+    async () => {
+        await pollSensors();
+        await pollRfIDs();
+        await setAlerts();
+    },
+    20000
+);
 
-// pollSensors();
-// pollRfIDs();
-
+pollSensors();
+pollRfIDs();
 setAlerts();

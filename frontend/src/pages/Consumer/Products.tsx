@@ -92,6 +92,7 @@ const History = () => {
         shipmentID,
         orderID,
         transporterID,
+        productID,
         consumerID: userInfo!.uid,
         sellerID: productData.sellerID,
         source: sellerData.address,
