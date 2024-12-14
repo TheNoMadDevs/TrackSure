@@ -53,7 +53,7 @@ const ShipmentHistory = () => {
                       Shipment ID: {shipment.shipmentID}
                     </span>
                     <span className="px-2 py-1 rounded text-white bg-blue-700">
-                      {shipment.deliveryDate.toDate().toLocaleDateString()}
+                      {shipment.deliveredDate.toDate().toLocaleDateString()}
                     </span>
                   </div>
                   <div className="text-sm text-gray-500">

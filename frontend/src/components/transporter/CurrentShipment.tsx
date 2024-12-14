@@ -9,7 +9,8 @@ import {
   doc, 
   getDoc ,
   updateDoc,
-  onSnapshot
+  onSnapshot,
+  Timestamp
 } from "firebase/firestore";
 import app from "@services/firebase";
 import { Shipment, TrackingDetails } from "@schemas/shipmentSchema";
@@ -20,6 +21,7 @@ import TemperatureCard from "@components/common/TemperatureCard";
 import AlertsCard from "@components/common/AlertsCard";
 import MapCard from "@components/common/MapCard";
 import { ArrowLeft } from "lucide-react";
+import toast from "react-hot-toast";
 
 const TrackingPage = () => {
   const db = getFirestore(app);
@@ -114,10 +116,10 @@ const TrackingPage = () => {
       })
       await updateDoc(shipmentRef, {
         status: "delivered",
-        deliveredDate: new Date().toISOString(),
+        deliveredDate: Timestamp.now(),
       });
       await updateDoc(orderDoc.ref, { delivered: true });
-      console.log("Shipment marked as delivered");
+      toast.success("Shipment marked as delivered!");
       fetchShipments();
     } catch (error) {
       console.error("Error marking shipment as delivered: ", error);

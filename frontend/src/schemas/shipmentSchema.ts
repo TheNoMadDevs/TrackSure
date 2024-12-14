@@ -21,7 +21,7 @@ interface Shipment {
     destination: string;
     trackingDetails: TrackingDetails[];
     status: "pending" | "in-transit" | "delivered"; 
-    deliveryDate: Timestamp; // timestamp
+    deliveredDate: Timestamp; // timestamp
     createdAt: Timestamp; // timestamp
 }
 
