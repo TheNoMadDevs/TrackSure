@@ -16,13 +16,18 @@ const AlertsCard: React.FC<AlertsCardProps> = ({ alerts }) => {
       <CardContent>
         <div className="text-2xl font-bold">{alerts.length}</div>
         <p className="text-xs text-muted-foreground">Active alerts</p>
-        <ul className="mt-2 space-y-1">
-          {alerts.map((alert, index) => (
-            <li key={index} className="text-sm">
-              {alert}
-            </li>
-          ))}
-        </ul>
+        <div className="max-h-40 overflow-y-auto mt-2 pr-2">
+          <ul className="space-y-1">
+            {alerts.map((alert, index) => (
+              <li 
+                key={index} 
+                className="text-sm rounded-sm px-2 py-1 hover:bg-accent/50 transition-colors"
+              >
+                {alert}
+              </li>
+            ))}
+          </ul>
+        </div>
       </CardContent>
     </Card>
   );

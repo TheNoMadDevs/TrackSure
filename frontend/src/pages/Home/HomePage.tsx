@@ -1,9 +1,8 @@
 import { Link } from "react-router-dom"
-
 import { Button } from "@components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@components/ui/card"
 import Header from "@components/common/Header"
-import { ArrowRight, BarChart2, Truck, ShieldCheck } from 'lucide-react'
+import { ArrowRight, BarChart2, Truck, ShieldCheck, Zap } from 'lucide-react'
 
 export default function Home() {
   return (
@@ -28,7 +27,7 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="grid gap-6 md:grid-cols-3 mb-12">
+          <section className="grid gap-6 md:grid-cols-4 mb-24">
             <Card>
               <CardHeader>
                 <Truck className="h-10 w-10 mb-2 text-primary" />
@@ -59,6 +58,16 @@ export default function Home() {
                 Gain valuable insights into your supply chain performance and optimize operations.
               </CardContent>
             </Card>
+            <Card>
+              <CardHeader>
+                <Zap className="h-10 w-10 mb-2 text-primary" />
+                <CardTitle>Efficient Operations</CardTitle>
+                <CardDescription>Streamline your supply chain processes</CardDescription>
+              </CardHeader>
+              <CardContent>
+              Designed for reliability, the platform retrieves and can stores data locally, ensuring uninterrupted operations even during internet outages.
+              </CardContent>
+            </Card>
           </section>
 
           <section className="text-center py-5">
@@ -71,7 +80,7 @@ export default function Home() {
           </section>
         </div>
       </main>
-        <footer className="border-t py-6 md:py-0">
+      <footer className="border-t py-6 md:py-0">
         <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
           <div className="text-center md:text-left py-2 md:py-4">
             <p className="text-sm text-muted-foreground">
@@ -97,3 +106,4 @@ export default function Home() {
     </div>
   )
 }
+

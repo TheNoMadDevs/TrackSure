@@ -102,7 +102,7 @@ export const SignUp: React.FC = () => {
             alt="Logo" 
             className="h-36 w-36 mb-2"
           />
-          <CardTitle className="text-center">Sign In</CardTitle>
+          <CardTitle className="text-center">Sign Up</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
