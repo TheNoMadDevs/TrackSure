@@ -25,4 +25,10 @@ interface Shipment {
     createdAt: Timestamp; // timestamp
 }
 
-export type { Location, TrackingDetails, Shipment };
+interface Alert {
+    shipmentID: string;
+    message: string;
+    timestamp: Timestamp;
+}
+
+export type { Location, TrackingDetails, Shipment, Alert };

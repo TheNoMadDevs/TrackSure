@@ -1,9 +1,10 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@components/ui/card";
 import { AlertTriangle } from "lucide-react";
+import { Alert } from "@schemas/shipmentSchema";
 
 interface AlertsCardProps {
-  alerts: string[];
+  alerts: Alert[];
 }
 
 const AlertsCard: React.FC<AlertsCardProps> = ({ alerts }) => {
@@ -19,7 +20,7 @@ const AlertsCard: React.FC<AlertsCardProps> = ({ alerts }) => {
         <ul className="mt-2 space-y-1">
           {alerts.map((alert, index) => (
             <li key={index} className="text-sm">
-              {alert}
+              {alert.message}
             </li>
           ))}
         </ul>
