@@ -128,7 +128,7 @@ const TrackingPage = () => {
 
   // Render shipment list
   const renderShipmentList = () => (
-    <div className="space-y-4">
+    <div className="space-y-4 flex flex-col">
       {tracking.length > 0 ? (
         tracking.map((shipment) => (
           <div
@@ -142,7 +142,7 @@ const TrackingPage = () => {
                 Shipment ID: {shipment.shipmentID}
               </span>
             </div>
-            <div className="grid grid-cols-3 gap-2 text-sm text-gray-600">
+            <div className="grid grid-cols-3 gap-2 text-sm py-2 text-gray-600">
               <div>Order ID: {shipment.orderID}</div>
               <div>Transporter ID: {shipment.transporterID}</div>
               <div className="text-right">
@@ -156,15 +156,17 @@ const TrackingPage = () => {
                 </span>
               </div>
             </div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleMarkAsDelivered(shipment);
-              }}
-              className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-300"
-            >
-              Mark as delivered
-            </button>
+            <div className="flex items-center justify-center">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleMarkAsDelivered(shipment);
+                }}
+                className="mt-2 px-4 py-2 w-[250px] flex items-center justify-center bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-300"
+              >
+                Mark as delivered
+              </button>
+            </div>
           </div>
         ))
       ) : (
