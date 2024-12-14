@@ -98,7 +98,7 @@ const History = () => {
         destination: userInfo!.address,
         trackingDetails: [],
         status: "pending",
-        deliveryDate: null,
+        deliveredDate: null,
       };
       await setDoc(doc(db, "orders", orderID), orderData);
       await setDoc(doc(db, "shipments", shipmentID), shipmentData);

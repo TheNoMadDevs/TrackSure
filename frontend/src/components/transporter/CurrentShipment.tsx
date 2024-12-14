@@ -8,6 +8,7 @@ import {
   getDocs, 
   doc, 
   getDoc ,
+  updateDoc,
   onSnapshot
 } from "firebase/firestore";
 import app from "@services/firebase";
@@ -92,8 +93,35 @@ const TrackingPage = () => {
     navigate(`/transporter/currentshipment/${shipmentID}`);
   };
 
-  const handleBackClick = () => {
-    shipmentId ? navigate("/transporter/currentshipment") : navigate(-1);
+  const handleMarkAsDelivered = async (shipment: Shipment) => {
+    try {
+      const shipmentRef = doc(db, "shipments", shipment.shipmentID);
+      const transporterQuery = query(
+        collection(db, "transporters"),
+        where("transporterID", "==", shipment.transporterID)
+      );
+      const transporterSnap = await getDocs(transporterQuery);
+      const transporterDoc = transporterSnap.docs[0];
+      const orderQuery = query(
+        collection(db, "orders"),
+        where("orderID", "==", shipment.orderID)
+      );
+      const orderSnap = await getDocs(orderQuery);
+      const orderDoc = orderSnap.docs[0];
+      await updateDoc(transporterDoc.ref, {
+        isAvailable: true,
+        currentShipmentID: null,
+      })
+      await updateDoc(shipmentRef, {
+        status: "delivered",
+        deliveredDate: new Date().toISOString(),
+      });
+      await updateDoc(orderDoc.ref, { delivered: true });
+      console.log("Shipment marked as delivered");
+      fetchShipments();
+    } catch (error) {
+      console.error("Error marking shipment as delivered: ", error);
+    }
   };
 
   // Render shipment list
@@ -126,6 +154,15 @@ const TrackingPage = () => {
                 </span>
               </div>
             </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleMarkAsDelivered(shipment);
+              }}
+              className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-300"
+            >
+              Mark as delivered
+            </button>
           </div>
         ))
       ) : (
