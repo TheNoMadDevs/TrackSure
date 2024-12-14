@@ -10,10 +10,11 @@ import {
   getDoc ,
   updateDoc,
   onSnapshot,
-  Timestamp
+  Timestamp,
+  addDoc
 } from "firebase/firestore";
 import app from "@services/firebase";
-import { Shipment, TrackingDetails } from "@schemas/shipmentSchema";
+import { Alert, Shipment, TrackingDetails } from "@schemas/shipmentSchema";
 import { Product } from "@schemas/productSchema";
 import { useAuthUser } from "@hooks/useAuthUser";
 import HumidityCard from '@components/common/HumidityCard';
@@ -31,6 +32,7 @@ const TrackingPage = () => {
 
   const [tracking, setTracking] = useState<Shipment[]>([]);
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
   const [product, setProduct] = useState<Product | null>(null);
 
   const fetchShipments = async () => {
@@ -75,9 +77,13 @@ const TrackingPage = () => {
 
   useEffect(() => {
     fetchShipments();
+  
+    let unsubscribeShipment: () => void;
+    let unsubscribeAlerts: () => void;
+  
     if (shipmentId) {
       const shipmentRef = doc(db, "shipments", shipmentId);
-      const unsubscribe = onSnapshot(shipmentRef, (doc) => {
+      unsubscribeShipment = onSnapshot(shipmentRef, (doc) => {
         if (doc.exists()) {
           setSelectedShipment(doc.data() as Shipment);
         } else {
@@ -85,10 +91,19 @@ const TrackingPage = () => {
           setSelectedShipment(null);
         }
       });
-
-      // Cleanup listener on component unmount
-      return () => unsubscribe();
+  
+      const alertsRef = collection(db, "alerts");
+      const alertsQuery = query(alertsRef, where("shipmentID", "==", shipmentId));
+  
+      unsubscribeAlerts = onSnapshot(alertsQuery, (snapshot) => {
+        const relevantAlerts = snapshot.docs.map((doc) => doc.data() as Alert);
+        setAlerts(relevantAlerts);
+      });
     }
+    return () => {
+      if (unsubscribeShipment) unsubscribeShipment();
+      if (unsubscribeAlerts) unsubscribeAlerts();
+    };
   }, [shipmentId, userInfo?.uid]);
 
   const handleShipmentClick = (shipmentID: string) => {
@@ -110,6 +125,11 @@ const TrackingPage = () => {
       );
       const orderSnap = await getDocs(orderQuery);
       const orderDoc = orderSnap.docs[0];
+      const alertData = {
+        shipmentID: shipment.shipmentID,
+        message: "Shipment delivered successfully!",
+        timestamp: Timestamp.now(),
+      };
       await updateDoc(transporterDoc.ref, {
         isAvailable: true,
         currentShipmentID: null,
@@ -119,6 +139,7 @@ const TrackingPage = () => {
         deliveredDate: Timestamp.now(),
       });
       await updateDoc(orderDoc.ref, { delivered: true });
+      await addDoc(collection(db, "alerts"), alertData);
       toast.success("Shipment marked as delivered!");
       fetchShipments();
     } catch (error) {
@@ -189,11 +210,6 @@ const TrackingPage = () => {
       time: detail.lastUpdated,
       humidity: detail.humidity
     }));
-
-    const alerts = [
-      "Temperature is too high",
-      "Humidity is less than 80%",
-    ]
 
     return (
       <div className="space-y-6">

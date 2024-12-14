@@ -136,13 +136,74 @@ async function pollSensors(): Promise<void> {
     }
 }
 
-setInterval(
-    async () => {
-        await pollSensors();
-        await pollRfIDs();
-    },
-    20000
-);
+////// Alerts //////
+async function setAlerts(): Promise<void> {
+    console.log('Setting alerts...');
+    try {
+        const shipmentsSnapshot = await db.collection('shipments').where('status', '==', 'in-transit').get();
+        if (shipmentsSnapshot.empty) {
+            console.log('No in-transit shipments found.');
+            return;
+        }
+        console.log(`Found ${shipmentsSnapshot.size} in-transit shipments.`);
+        shipmentsSnapshot.forEach(async (shipmentDoc) => {
+            const shipment = shipmentDoc.data();
+            if (!shipment.trackingDetails || shipment.trackingDetails.length === 0) {
+                console.log(`No tracking details for shipment: ${shipment.shipmentID}`);
+                return;
+            }
+            const latestTrackingDetail = shipment.trackingDetails[shipment.trackingDetails.length - 1];
+            const { temperature, humidity } = latestTrackingDetail;
+            const productID = shipment.productID;
+            if (!productID) {
+                console.log(`No productID found for shipment: ${shipment.shipmentID}`);
+                return;
+            }
+            const productDoc = await db.collection('products').doc(productID).get();
+            if (!productDoc.exists) {
+                console.log(`Product not found for productID: ${productID}`);
+                return;
+            }
+            const product = productDoc.data();
+            const { temperatureRange, humidityRange } = product!;
+            if (!temperatureRange || !humidityRange) {
+                console.log(`Temperature or humidity range missing for product: ${productID}`);
+                return;
+            }
+            const tempOutOfRange = temperature < temperatureRange.min || temperature > temperatureRange.max;
+            const humidityOutOfRange = humidity < humidityRange.min || humidity > humidityRange.max;
+            if (tempOutOfRange || humidityOutOfRange) {
+                const alertMessage = tempOutOfRange
+                    ? `Temperature (${temperature}°C) is out of the safe range (${temperatureRange.min}°C - ${temperatureRange.max}°C).`
+                    : `Humidity (${humidity}%) is out of the safe range (${humidityRange.min}% - ${humidityRange.max}%).`;
+                const alertData = {
+                    shipmentID: shipment.shipmentID,
+                    message: alertMessage,
+                    timestamp: admin.firestore.Timestamp.now(),
+                };
+                await db.collection('alerts').add(alertData);
+                console.log(`Alert added for shipment ${shipment.shipmentID}: ${alertMessage}`);
+            } else {
+                console.log(`All conditions are within range for shipment: ${shipment.shipmentID}`);
+            }
+        });
+    } catch (error) {
+        console.error('Error setting alerts:', error);
+    } finally {
+        console.log('Setting alerts complete.');
+    }
+}
 
-pollSensors();
-pollRfIDs();
+
+// setInterval(
+//     async () => {
+//         await pollSensors();
+//         await pollRfIDs();
+//     },
+//     20000
+// );
+
+// pollSensors();
+// pollRfIDs();
+
+setAlerts();
