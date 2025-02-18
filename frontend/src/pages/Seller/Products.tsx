@@ -225,13 +225,15 @@ const History = () => {
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0">
-                            <Calendar
-                              mode="single"
-                              selected={newProduct.expiryDate}
-                              onSelect={(e) => setNewProduct({ ...newProduct, expiryDate: e })}
-                              initialFocus
-                            />
-                          </PopoverContent>
+                          <Calendar
+                            mode="single"
+                            selected={newProduct.expiryDate}
+                            onSelect={(date: Date | undefined) =>
+                              setNewProduct((prev) => ({ ...prev, expiryDate: date || new Date() }))
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
                         </Popover>
                       </div>
 

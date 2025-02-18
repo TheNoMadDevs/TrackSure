@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { cn } from "@lib/utils";
 import { Button } from "@components/ui/button";
 import { ScrollArea } from "@components/ui/scroll-area";
-import { Home, Users, FileText, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Home, Users,LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AuthContext } from "@context/AuthContext";
 import { toast } from "react-hot-toast";
 
