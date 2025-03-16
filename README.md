@@ -11,7 +11,7 @@ TrackSure is an food supply chain tracking system that ensures enhanced safety a
 - **Data-Driven Insights**: Advanced analytics for supply chain performance optimization
 - **Multi-Role Support**: Dedicated interfaces for Admin, Consumer, Seller, and Transporter roles
 - **Responsive Design**: Modern, mobile-friendly UI built with React and Tailwind CSS
-- **Real-time Notifications**: Toast notifications for user feedback
+- **Real-time Notifications**: Toast notifications for Alerts 
 
 ## 🛠️ Tech Stack
 
@@ -21,7 +21,6 @@ TrackSure is an food supply chain tracking system that ensures enhanced safety a
 - **Routing**: React Router DOM v7
 - **State Management**: React Context API
 - **Authentication**: Firebase Auth
-- **Forms**: React Hook Form with Zod validation
 - **Maps**: React Leaflet for location tracking
 - **Charts**: Recharts for data visualization
 - **UI Components**: Radix UI primitives with shadcn/ui
@@ -46,7 +45,7 @@ frontend/
 │   ├── context/            # React Context providers
 │   ├── hooks/              # Custom React hooks
 │   ├── services/           # API services
-│   ├── schemas/            # Zod validation schemas
+│   ├── schemas/            # Schemas  
 │   ├── config/             # Configuration files
 │   ├── enums/              # TypeScript enums
 │   ├── lib/                # Utility libraries
@@ -139,7 +138,6 @@ The application uses shadcn/ui components built on top of Radix UI primitives, p
 The project uses Tailwind CSS with custom configuration in `tailwind.config.ts` for:
 - Custom color schemes
 - Typography settings
-- Animation utilities
 
 ### TypeScript
 TypeScript configuration is set up with:
