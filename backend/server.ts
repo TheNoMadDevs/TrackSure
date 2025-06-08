@@ -1,6 +1,9 @@
 import axios from 'axios';
 import * as admin from 'firebase-admin';
 import path from 'path';
+import { Server } from 'socket.io';
+import { createServer } from 'http';
+import express from 'express';
 
 const serviceAccount = path.join(__dirname, '../account.json');
 
@@ -10,6 +13,56 @@ admin.initializeApp({
 });
 
 const db = admin.firestore();
+
+// Socket.IO setup
+const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
+
+const PORT = process.env.PORT || 3001;
+
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+    console.log('Client connected:', socket.id);
+    
+    socket.on('disconnect', () => {
+        console.log('Client disconnected:', socket.id);
+    });
+    
+    // Listen for requests to get real-time data
+    socket.on('requestSensorData', async (data) => {
+        try {
+            const { sensorID, pin } = data;
+            const sensorValue = await getSensorData(sensorID, pin);
+            socket.emit('sensorDataResponse', { sensorID, pin, value: sensorValue });
+        } catch (error) {
+            socket.emit('error', { message: 'Failed to fetch sensor data' });
+        }
+    });
+    
+    socket.on('requestShipmentTracking', async (shipmentID) => {
+        try {
+            const shipmentDoc = await db.collection('shipments').doc(shipmentID).get();
+            if (shipmentDoc.exists) {
+                socket.emit('shipmentTrackingResponse', { shipmentID, data: shipmentDoc.data() });
+            } else {
+                socket.emit('error', { message: 'Shipment not found' });
+            }
+        } catch (error) {
+            socket.emit('error', { message: 'Failed to fetch shipment data' });
+        }
+    });
+});
+
+// Start the server
+server.listen(PORT, () => {
+    console.log(`Socket.IO server running on port ${PORT}`);
+});
 
 interface TrackingDetail {
     currentLocation: {
@@ -70,6 +123,16 @@ async function pollRfIDs(): Promise<void> {
                             status: 'in-transit',
                         });
                         console.log(`Shipment ${shipmentID} status updated to 'in-transit'.`);
+                        
+                        // Emit shipment status update via Socket.IO
+                        io.emit('shipmentStatusUpdate', {
+                            shipmentID,
+                            status: 'in-transit',
+                            transporterID: userData.uid,
+                            transporterName: userData.name,
+                            timestamp: new Date().toISOString()
+                        });
+                        
                         await setSensorData(rfID, '0', 0);
                     } else {
                         console.log(`No pending shipments for transporter ${userData.name}.`);
@@ -122,6 +185,13 @@ async function pollSensors(): Promise<void> {
 
                 await db.collection('shipments').doc(shipment.shipmentID).update({
                     trackingDetails: admin.firestore.FieldValue.arrayUnion(newTrackingDetail),
+                });
+
+                // Emit tracking update via Socket.IO
+                io.emit('trackingUpdate', {
+                    shipmentID: shipment.shipmentID,
+                    trackingDetail: newTrackingDetail,
+                    timestamp: new Date().toISOString()
                 });
 
                 console.log(`Shipment ${shipment.id} updated with new tracking details.`);
@@ -182,6 +252,17 @@ async function setAlerts(): Promise<void> {
                     timestamp: admin.firestore.Timestamp.now(),
                 };
                 await db.collection('alerts').add(alertData);
+                
+                // Emit alert via Socket.IO
+                io.emit('newAlert', {
+                    shipmentID: shipment.shipmentID,
+                    message: alertMessage,
+                    timestamp: admin.firestore.Timestamp.now().toDate().toISOString(),
+                    type: tempOutOfRange ? 'temperature' : 'humidity',
+                    currentValue: tempOutOfRange ? temperature : humidity,
+                    safeRange: tempOutOfRange ? temperatureRange : humidityRange
+                });
+                
                 console.log(`Alert added for shipment ${shipment.shipmentID}: ${alertMessage}`);
             } else {
                 console.log(`All conditions are within range for shipment: ${shipment.shipmentID}`);
