@@ -67,7 +67,7 @@ frontend/
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/TheNoMadDevs/TrackSure.git
    cd TrackSure/frontend
    ```
 
@@ -118,7 +118,11 @@ The application supports four distinct user roles:
 
 Each role has protected routes and dedicated interfaces tailored to their specific needs.
 
-![Application Dashboard](./docs/images/dashboard-screenshot.png)
+![Consumer](https://github.com/user-attachments/assets/03f66390-8960-4138-8021-bfea06a6450c)
+![Transporter](https://github.com/user-attachments/assets/81d53480-bbce-42f0-aa63-8bc72a05dc28)
+![Seller](https://github.com/user-attachments/assets/ccd00913-45ff-4b5f-9d6b-252edd21d599)
+![Admin](https://github.com/user-attachments/assets/4248c2e0-5dfe-4f50-b198-dc74a52cc0ae)
+
 
 ## 🎨 UI Components
 

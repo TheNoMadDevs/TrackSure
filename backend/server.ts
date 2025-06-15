@@ -14,7 +14,6 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-// Socket.IO setup
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
@@ -26,7 +25,6 @@ const io = new Server(server, {
 
 const PORT = process.env.PORT || 3001;
 
-// Socket.IO connection handling
 io.on('connection', (socket) => {
     console.log('Client connected:', socket.id);
     
@@ -34,7 +32,6 @@ io.on('connection', (socket) => {
         console.log('Client disconnected:', socket.id);
     });
     
-    // Listen for requests to get real-time data
     socket.on('requestSensorData', async (data) => {
         try {
             const { sensorID, pin } = data;
@@ -59,7 +56,6 @@ io.on('connection', (socket) => {
     });
 });
 
-// Start the server
 server.listen(PORT, () => {
     console.log(`Socket.IO server running on port ${PORT}`);
 });
@@ -124,7 +120,6 @@ async function pollRfIDs(): Promise<void> {
                         });
                         console.log(`Shipment ${shipmentID} status updated to 'in-transit'.`);
                         
-                        // Emit shipment status update via Socket.IO
                         io.emit('shipmentStatusUpdate', {
                             shipmentID,
                             status: 'in-transit',
@@ -206,7 +201,7 @@ async function pollSensors(): Promise<void> {
     }
 }
 
-////// Alerts //////
+////// Alerts s/////
 async function setAlerts(): Promise<void> {
     console.log('Setting alerts...');
     try {
