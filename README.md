@@ -1,8 +1,8 @@
 # TrackSure - Food supply Chain Tracking System
 
-![TrackSure Banner](https://i.ibb.co/0y2RnTVm/Tracksureeee.jpg)
-
 TrackSure is an food supply chain tracking system that ensures enhanced safety and efficiency throughout the food distribution process. This application provides an intuitive interface for different stakeholders in the supply chain.
+
+![Landing](https://github.com/user-attachments/assets/caa38878-ff97-43d8-ab53-e60fca9e9e4c)
 
 ## 🚀 Features
 
