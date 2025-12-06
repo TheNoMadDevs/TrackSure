@@ -1,24 +1,27 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { 
-  getFirestore, 
-  collection, 
-  query, 
-  where, 
-  getDocs, 
-  doc, 
-  getDoc ,
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  getDoc,
   updateDoc,
   onSnapshot,
   Timestamp,
-  addDoc
+  addDoc,
 } from "firebase/firestore";
 import app from "@services/firebase";
 import { Alert, Shipment, TrackingDetails } from "@schemas/shipmentSchema";
 import { Product } from "@schemas/productSchema";
 import { useAuthUser } from "@hooks/useAuthUser";
-import HumidityCard from '@components/common/HumidityCard';
+import HumidityCard from "@components/common/HumidityCard";
 import TemperatureCard from "@components/common/TemperatureCard";
+import DsTempCard from "@components/common/DsTempCard";
+import TiltCard from "@components/common/TiltCard";
+import RotationCard from "@components/common/RotationCard";
 import AlertsCard from "@components/common/AlertsCard";
 import MapCard from "@components/common/MapCard";
 import { ArrowLeft } from "lucide-react";
@@ -31,9 +34,12 @@ const TrackingPage = () => {
   const { userInfo } = useAuthUser();
 
   const [tracking, setTracking] = useState<Shipment[]>([]);
-  const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
+  const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(
+    null
+  );
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [product, setProduct] = useState<Product | null>(null);
+  const [pathHistory, setPathHistory] = useState<[number, number][]>([]);
 
   const fetchShipments = async () => {
     try {
@@ -77,24 +83,43 @@ const TrackingPage = () => {
 
   useEffect(() => {
     fetchShipments();
-  
+
     let unsubscribeShipment: () => void;
     let unsubscribeAlerts: () => void;
-  
+
     if (shipmentId) {
       const shipmentRef = doc(db, "shipments", shipmentId);
       unsubscribeShipment = onSnapshot(shipmentRef, (doc) => {
         if (doc.exists()) {
-          setSelectedShipment(doc.data() as Shipment);
+          const shipmentData = doc.data() as Shipment;
+          setSelectedShipment(shipmentData);
+
+          // Update path history with all tracking locations
+          if (
+            shipmentData.trackingDetails &&
+            shipmentData.trackingDetails.length > 0
+          ) {
+            const newPath = shipmentData.trackingDetails.map(
+              (detail) =>
+                [
+                  parseFloat(detail.currentLocation.latitude),
+                  parseFloat(detail.currentLocation.longitude),
+                ] as [number, number]
+            );
+            setPathHistory(newPath);
+          }
         } else {
           console.error("Shipment not found!");
           setSelectedShipment(null);
         }
       });
-  
+
       const alertsRef = collection(db, "alerts");
-      const alertsQuery = query(alertsRef, where("shipmentID", "==", shipmentId));
-  
+      const alertsQuery = query(
+        alertsRef,
+        where("shipmentID", "==", shipmentId)
+      );
+
       unsubscribeAlerts = onSnapshot(alertsQuery, (snapshot) => {
         const relevantAlerts = snapshot.docs.map((doc) => doc.data() as Alert);
         setAlerts(relevantAlerts);
@@ -133,13 +158,16 @@ const TrackingPage = () => {
       await updateDoc(transporterDoc.ref, {
         isAvailable: true,
         currentShipmentID: null,
-      })
+      });
       await updateDoc(shipmentRef, {
         status: "delivered",
         deliveredDate: Timestamp.now(),
       });
       await updateDoc(orderDoc.ref, { delivered: true });
       await addDoc(collection(db, "alerts"), alertData);
+      await fetch(
+        "https://blynk.cloud/external/api/update?token=8k34kK4QZ8_AEB8jeygnFvHJiT18la1k&V10=0"
+      );
       toast.success("Shipment marked as delivered!");
       fetchShipments();
     } catch (error) {
@@ -155,8 +183,7 @@ const TrackingPage = () => {
           <div
             key={shipment.shipmentID}
             onClick={() => handleShipmentClick(shipment.shipmentID)}
-            className="flex flex-col space-y-2 w-full rounded-lg border
-            hover:bg-slate-900 p-4 shadow-sm cursor-pointer transition-all duration-300 ease-in-out"
+            className="flex flex-col space-y-2 w-full rounded-lg border hover:bg-slate-900 p-4 shadow-sm cursor-pointer transition-all duration-300 ease-in-out"
           >
             <div className="flex justify-between items-center w-full">
               <span className="font-semibold text-white">
@@ -167,12 +194,16 @@ const TrackingPage = () => {
               <div>Order ID: {shipment.orderID}</div>
               <div>Transporter ID: {shipment.transporterID}</div>
               <div className="text-right">
-                Status: 
-                <span className={`ml-2 ${
-                  shipment.status === 'pending' ? 'text-yellow-600' : 
-                  shipment.status === 'in-transit' ? 'text-blue-600' : 
-                  'text-green-600'
-                }`}>
+                Status:
+                <span
+                  className={`ml-2 ${
+                    shipment.status === "pending"
+                      ? "text-yellow-600"
+                      : shipment.status === "in-transit"
+                      ? "text-blue-600"
+                      : "text-green-600"
+                  }`}
+                >
                   {shipment.status}
                 </span>
               </div>
@@ -200,56 +231,122 @@ const TrackingPage = () => {
   const renderShipmentDetails = () => {
     if (!selectedShipment) return null;
 
-    const trackingDetails: TrackingDetails[] = selectedShipment.trackingDetails;
-    const tempData = trackingDetails.map(detail => ({
+    const trackingDetails: TrackingDetails[] =
+      selectedShipment.trackingDetails || [];
+    const tempData = trackingDetails.map((detail) => ({
       time: detail.lastUpdated,
-      temp: detail.temperature
+      temp: detail.temperature,
     }));
 
-    const humidData = trackingDetails.map(detail => ({
+    const humidData = trackingDetails.map((detail) => ({
       time: detail.lastUpdated,
-      humidity: detail.humidity
+      humidity: detail.humidity,
     }));
+
+    const dsTempData = trackingDetails.map((detail) => ({
+      time: detail.lastUpdated,
+      dsTemp: detail.dsTemp,
+    }));
+
+    const tiltData = trackingDetails.map((detail) => ({
+      time: detail.lastUpdated,
+      tilt: detail.tilt,
+    }));
+
+    const rotationData = trackingDetails.map((detail) => ({
+      time: detail.lastUpdated,
+      rotation: detail.rotation,
+    }));
+
+    const latestTracking = trackingDetails[trackingDetails.length - 1];
 
     return (
       <div className="space-y-6">
         {/* Shipment Information */}
         <div className="rounded-lg border p-6 shadow-sm">
-          <h3 className="text-lg font-semibold mb-4 text-white border-b pb-2">Shipment Information</h3>
+          <h3 className="text-lg font-semibold mb-4 text-white border-b pb-2">
+            Shipment Information
+          </h3>
           <div className="grid grid-cols-3 gap-2">
             {[
-              { label: "Shipment ID", value: selectedShipment.shipmentID },
-              { label: "Order ID", value: selectedShipment.orderID },
-              { label: "Transporter ID", value: selectedShipment.transporterID },
-              { label: "Source", value: selectedShipment.source },
-              { label: "Destination", value: selectedShipment.destination },
-              // { label: "Delivery Date", value: selectedShipment.deliveryDate || "N/A" },
-              { 
-                label: "Status", 
-                value: selectedShipment.status, 
-                className: "text-blue-600 font-bold"
+              {
+                label: "Shipment ID",
+                value: selectedShipment.shipmentID,
+              },
+              {
+                label: "Order ID",
+                value: selectedShipment.orderID,
+              },
+              {
+                label: "Transporter ID",
+                value: selectedShipment.transporterID,
+              },
+              {
+                label: "Source",
+                value: selectedShipment.source,
+              },
+              {
+                label: "Destination",
+                value: selectedShipment.destination,
+              },
+              {
+                label: "Status",
+                value: selectedShipment.status,
+                className: "text-blue-600 font-bold",
               },
             ].map(({ label, value, className }) => (
               <div key={label}>
                 <p className="text-sm text-gray-500">{label}</p>
-                <p className={`font-semibold ${className || 'text-white'}`}>{value}</p>
+                <p className={`font-semibold ${className || "text-white"}`}>
+                  {value}
+                </p>
               </div>
             ))}
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-2">
-          <HumidityCard currentHumidity={humidData[0]?.humidity || 0} data={humidData} />
-          <TemperatureCard currentTemp={tempData[0]?.temp || 0} data={tempData} />
+
+        {/* First Row: Temperature, Humidity, Alerts */}
+        <div className="grid grid-cols-3 gap-4">
+          <TemperatureCard
+            currentTemp={latestTracking?.temperature || 0}
+            data={tempData}
+          />
+          <HumidityCard
+            currentHumidity={latestTracking?.humidity || 0}
+            data={humidData}
+          />
           <AlertsCard alerts={alerts} />
         </div>
+
+        {/* Second Row: DS Temperature, Tilt, Rotation */}
+        <div className="grid grid-cols-3 gap-4">
+          <DsTempCard
+            currentDsTemp={latestTracking?.dsTemp || 0}
+            data={dsTempData}
+          />
+          <TiltCard currentTilt={latestTracking?.tilt || 0} data={tiltData} />
+          <RotationCard
+            currentRotation={latestTracking?.rotation || 0}
+            data={rotationData}
+          />
+        </div>
+
+        {/* Map */}
         <div>
           {trackingDetails.length > 0 && (
-            <MapCard 
+            <MapCard
               center={[
-                parseFloat(trackingDetails[0].currentLocation.latitude), 
-                parseFloat(trackingDetails[0].currentLocation.longitude)
-              ]} 
-              popupText="Current Location" 
+                parseFloat(
+                  trackingDetails[trackingDetails.length - 1].currentLocation
+                    .latitude
+                ),
+                parseFloat(
+                  trackingDetails[trackingDetails.length - 1].currentLocation
+                    .longitude
+                ),
+              ]}
+              popupText="Current Location"
+              pathHistory={pathHistory}
             />
           )}
         </div>
@@ -257,12 +354,23 @@ const TrackingPage = () => {
         {/* Product Details */}
         {product && (
           <div className="rounded-lg border border-gray-200 p-6 shadow-sm">
-            <h3 className="text-lg font-semibold mb-4 text-white border-b pb-2">Product Details</h3>
+            <h3 className="text-lg font-semibold mb-4 text-white border-b pb-2">
+              Product Details
+            </h3>
             <div className="grid">
               {[
-                { label: "Product ID", value: product.productID },
-                { label: "Product Name", value: product.name },
-                { label: "Price", value: `$${product.price.toFixed(2)}` }
+                {
+                  label: "Product ID",
+                  value: product.productID,
+                },
+                {
+                  label: "Product Name",
+                  value: product.name,
+                },
+                {
+                  label: "Price",
+                  value: `$${product.price.toFixed(2)}`,
+                },
               ].map(({ label, value }) => (
                 <div key={label}>
                   <p className="text-sm text-gray-500 mb-1">{label}</p>
@@ -278,17 +386,15 @@ const TrackingPage = () => {
 
   return (
     <div className="w-full h-full">
-      <div className=" p-4 flex items-center">
-        {
-          shipmentId && (
-            <button 
-              onClick={() => navigate("/transporter/currentshipment")} 
-              className="mr-4 hover:bg-gray-200 p-2 rounded-full transition-colors duration-300"
-            >
-              <ArrowLeft className="h-6 w-6 text-gray-700" />
-            </button>
-          )
-        }
+      <div className="p-4 flex items-center">
+        {shipmentId && (
+          <button
+            onClick={() => navigate("/transporter/currentshipment")}
+            className="mr-4 hover:bg-gray-200 p-2 rounded-full transition-colors duration-300"
+          >
+            <ArrowLeft className="h-6 w-6 text-gray-700" />
+          </button>
+        )}
         <h2 className="text-xl font-bold text-white">
           {shipmentId ? "Shipment Details" : "Tracking"}
         </h2>

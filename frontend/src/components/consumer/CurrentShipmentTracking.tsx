@@ -14,8 +14,11 @@ import app from "@services/firebase";
 import { Shipment, TrackingDetails, Alert } from "@schemas/shipmentSchema";
 import { Product } from "@schemas/productSchema";
 import { useAuthUser } from "@hooks/useAuthUser";
-import HumidityCard from '@components/common/HumidityCard';
+import HumidityCard from "@components/common/HumidityCard";
 import TemperatureCard from "@components/common/TemperatureCard";
+import DsTempCard from "@components/common/DsTempCard";
+import TiltCard from "@components/common/TiltCard";
+import RotationCard from "@components/common/RotationCard";
 import AlertsCard from "@components/common/AlertsCard";
 import MapCard from "@components/common/MapCard";
 import { ArrowLeft } from "lucide-react";
@@ -30,6 +33,7 @@ const TrackingPage = () => {
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [product, setProduct] = useState<Product | null>(null);
+  const [pathHistory, setPathHistory] = useState<[number, number][]>([]);
 
   const fetchShipments = async () => {
     try {
@@ -81,7 +85,23 @@ const TrackingPage = () => {
       const shipmentRef = doc(db, "shipments", shipmentId);
       unsubscribeShipment = onSnapshot(shipmentRef, (doc) => {
         if (doc.exists()) {
-          setSelectedShipment(doc.data() as Shipment);
+          const shipmentData = doc.data() as Shipment;
+          setSelectedShipment(shipmentData);
+
+          // Update path history with all tracking locations
+          if (
+            shipmentData.trackingDetails &&
+            shipmentData.trackingDetails.length > 0
+          ) {
+            const newPath = shipmentData.trackingDetails.map(
+              (detail) =>
+                [
+                  parseFloat(detail.currentLocation.latitude),
+                  parseFloat(detail.currentLocation.longitude),
+                ] as [number, number]
+            );
+            setPathHistory(newPath);
+          }
         } else {
           console.error("Shipment not found!");
           setSelectedShipment(null);
@@ -107,7 +127,11 @@ const TrackingPage = () => {
   };
 
   const handleBackClick = () => {
-    shipmentId ? navigate("/consumer/tracking") : navigate(-1);
+    if (shipmentId) {
+      navigate("/consumer/tracking");
+    } else {
+      navigate(-1);
+    }
   };
 
   // Render shipment list
@@ -152,16 +176,34 @@ const TrackingPage = () => {
   const renderShipmentDetails = () => {
     if (!selectedShipment) return null;
 
-    const trackingDetails: TrackingDetails[] = selectedShipment.trackingDetails;
-    const tempData = trackingDetails.map(detail => ({
+    const trackingDetails: TrackingDetails[] =
+      selectedShipment.trackingDetails || [];
+    const tempData = trackingDetails.map((detail) => ({
       time: detail.lastUpdated,
-      temp: detail.temperature
+      temp: detail.temperature,
     }));
 
-    const humidData = trackingDetails.map(detail => ({
+    const humidData = trackingDetails.map((detail) => ({
       time: detail.lastUpdated,
-      humidity: detail.humidity
+      humidity: detail.humidity,
     }));
+
+    const dsTempData = trackingDetails.map((detail) => ({
+      time: detail.lastUpdated,
+      dsTemp: detail.dsTemp,
+    }));
+
+    const tiltData = trackingDetails.map((detail) => ({
+      time: detail.lastUpdated,
+      tilt: detail.tilt,
+    }));
+
+    const rotationData = trackingDetails.map((detail) => ({
+      time: detail.lastUpdated,
+      rotation: detail.rotation,
+    }));
+
+    const latestTracking = trackingDetails[trackingDetails.length - 1];
 
     return (
       <div className="space-y-6">
@@ -189,19 +231,49 @@ const TrackingPage = () => {
             ))}
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-2">
-          <HumidityCard currentHumidity={humidData[0]?.humidity || 0} data={humidData} />
-          <TemperatureCard currentTemp={tempData[0]?.temp || 0} data={tempData} />
+
+        {/* First Row: Temperature, Humidity, Alerts */}
+        <div className="grid grid-cols-3 gap-4">
+          <TemperatureCard
+            currentTemp={latestTracking?.temperature || 0}
+            data={tempData}
+          />
+          <HumidityCard
+            currentHumidity={latestTracking?.humidity || 0}
+            data={humidData}
+          />
           <AlertsCard alerts={alerts} />
         </div>
+
+        {/* Second Row: DS Temperature, Tilt, Rotation */}
+        <div className="grid grid-cols-3 gap-4">
+          <DsTempCard
+            currentDsTemp={latestTracking?.dsTemp || 0}
+            data={dsTempData}
+          />
+          <TiltCard currentTilt={latestTracking?.tilt || 0} data={tiltData} />
+          <RotationCard
+            currentRotation={latestTracking?.rotation || 0}
+            data={rotationData}
+          />
+        </div>
+
+        {/* Map */}
         <div>
           {trackingDetails.length > 0 && (
-            <MapCard 
+            <MapCard
               center={[
-                parseFloat(trackingDetails[0].currentLocation.latitude), 
-                parseFloat(trackingDetails[0].currentLocation.longitude)
-              ]} 
-              popupText="Current Location" 
+                parseFloat(
+                  trackingDetails[trackingDetails.length - 1].currentLocation
+                    .latitude
+                ),
+                parseFloat(
+                  trackingDetails[trackingDetails.length - 1].currentLocation
+                    .longitude
+                ),
+              ]}
+              popupText="Current Location"
+              pathHistory={pathHistory}
             />
           )}
         </div>

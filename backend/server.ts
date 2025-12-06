@@ -18,11 +18,15 @@ interface TrackingDetail {
     };
     temperature: number;
     humidity: number;
+    dsTemp: number;
+    tilt: number;
+    rotation: number;
     lastUpdated: admin.firestore.Timestamp;
 }
 
 async function getSensorData(sensorID: string, pin: string): Promise<number> {
     const url = `https://blynk.cloud/external/api/get?token=${sensorID}&V${pin}`;
+    console.log('Fetching data from URL:', url);
     try {
         const response = await axios.get<{ value: string }>(url);
         return Number(response.data);
@@ -55,7 +59,7 @@ async function pollRfIDs(): Promise<void> {
             const rfID = userData.rfID;
             if (rfID) {
                 console.log(`Checking sensor for user: ${userData.name} with RFID: ${rfID}`);
-                const sensorValue = await getSensorData(rfID, '0');
+                const sensorValue = await getSensorData(rfID, '10');
                 console.log(`Sensor value for user: ${userData.name} is ${sensorValue}`);
                 if (sensorValue === 1) {
                     console.log(`Sensor value is 1 for user: ${userData.name}. Updating shipment status to 'in-transit'.`);
@@ -117,7 +121,10 @@ async function pollSensors(): Promise<void> {
                 const temperature = await getSensorData(sensorID, '0');
                 const humidity = await getSensorData(sensorID, '1');
                 const latitude = await getSensorData(sensorID, '2');
-                const longitude = await getSensorData(sensorID, '3');
+                const longitude = await getSensorData(sensorID, '6');
+                const dsTemp = await getSensorData(sensorID, '12');
+                const tilt = await getSensorData(sensorID, '8');
+                const rotation = await getSensorData(sensorID, '9');
 
                 const newTrackingDetail: TrackingDetail = {
                     currentLocation: {
@@ -126,6 +133,9 @@ async function pollSensors(): Promise<void> {
                     },
                     temperature: temperature,
                     humidity: humidity,
+                    dsTemp: dsTemp,
+                    tilt: tilt,
+                    rotation: rotation,
                     lastUpdated: admin.firestore.Timestamp.now(),
                 };
 
@@ -134,11 +144,12 @@ async function pollSensors(): Promise<void> {
                 });
               
                 console.log(`Shipment ${shipment.id} updated with new tracking details.`);
+                console.log('Tracking temp '+ newTrackingDetail.temperature)
             } catch (error) {
                 console.error(`Error updating shipment ${shipment.id}:`, error);
             }
         });
-    } catch (error) {
+    } catch (error) {  
         console.error('Error polling shipments:', error);
     } finally {
         console.log('Polling sensors complete.');
@@ -162,7 +173,7 @@ async function setAlerts(): Promise<void> {
                 return;
             }
             const latestTrackingDetail = shipment.trackingDetails[shipment.trackingDetails.length - 1];
-            const { temperature, humidity } = latestTrackingDetail;
+            const { temperature, humidity, dsTemp, tilt, rotation } = latestTrackingDetail;
             const productID = shipment.productID;
             if (!productID) {
                 console.log(`No productID found for shipment: ${shipment.shipmentID}`);
@@ -174,17 +185,32 @@ async function setAlerts(): Promise<void> {
                 return;
             }
             const product = productDoc.data();
-            const { temperatureRange, humidityRange } = product!;
+            const { temperatureRange, humidityRange, dsTempRange, tiltThreshold, rotationRange } = product!;
             if (!temperatureRange || !humidityRange) {
                 console.log(`Temperature or humidity range missing for product: ${productID}`);
                 return;
             }
+            
             const tempOutOfRange = temperature < temperatureRange.min || temperature > temperatureRange.max;
             const humidityOutOfRange = humidity < humidityRange.min || humidity > humidityRange.max;
-            if (tempOutOfRange || humidityOutOfRange) {
-                const alertMessage = tempOutOfRange
-                    ? `Temperature (${temperature}°C) is out of the safe range (${temperatureRange.min}°C - ${temperatureRange.max}°C).`
-                    : `Humidity (${humidity}%) is out of the safe range (${humidityRange.min}% - ${humidityRange.max}%).`;
+            const dsTempOutOfRange = dsTempRange && (dsTemp < dsTempRange.min || dsTemp > dsTempRange.max);
+            const tiltExceeded = tiltThreshold && Math.abs(tilt) > tiltThreshold;
+            const rotationOutOfRange = rotationRange && (rotation < rotationRange.min || rotation > rotationRange.max);
+            
+            let alertMessage = '';
+            if (tempOutOfRange) {
+                alertMessage = `Temperature (${temperature}°C) is out of the safe range (${temperatureRange.min}°C - ${temperatureRange.max}°C).`;
+            } else if (humidityOutOfRange) {
+                alertMessage = `Humidity (${humidity}%) is out of the safe range (${humidityRange.min}% - ${humidityRange.max}%).`;
+            } else if (dsTempOutOfRange) {
+                alertMessage = `Fluid Temperature (${dsTemp}°C) is out of the safe range (${dsTempRange.min}°C - ${dsTempRange.max}°C).`;
+            } else if (tiltExceeded) {
+                alertMessage = `Tilt angle (${tilt}°) exceeds the threshold of ${tiltThreshold}°.`;
+            } else if (rotationOutOfRange) {
+                alertMessage = `Rotation (${rotation}°) is out of the safe range (${rotationRange.min}° - ${rotationRange.max}°).`;
+            }
+            
+            if (alertMessage) {
                 const alertData = {
                     shipmentID: shipment.shipmentID,
                     message: alertMessage,
@@ -207,13 +233,13 @@ async function setAlerts(): Promise<void> {
 
 setInterval(
     async () => {
-        await pollSensors();
+        // await pollSensors();
         await pollRfIDs();
-        await setAlerts();
+        //await setAlerts();
     },
-    20000 // Update as per the req
+    10000 // Update as per the req
 );
 
-pollSensors();
+// pollSensors();
 pollRfIDs();
-setAlerts();
+// setAlerts();

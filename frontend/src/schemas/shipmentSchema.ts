@@ -5,10 +5,13 @@ interface Location {
     longitude: string;
 }
   
-  interface TrackingDetails {
+interface TrackingDetails {
     currentLocation: Location;
     temperature: number;
     humidity: number;
+    dsTemp: number;
+    tilt: number;
+    rotation: number;
     lastUpdated: Timestamp; // timestamp
 }
   
